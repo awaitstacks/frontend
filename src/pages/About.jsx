@@ -14,7 +14,7 @@ const About = () => {
           </h1>
           <p className="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Crafting meaningful journeys with care, trust, and passion for
-            exploration and happy journey.
+            exploration.
           </p>
         </div>
 
