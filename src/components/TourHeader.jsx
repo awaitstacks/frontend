@@ -2,7 +2,8 @@ import React from "react";
 
 const TourHeader = () => {
   return (
-    <section className="relative overflow-hidden bg-white py-24 md:py-36">
+    //<section className="relative overflow-hidden bg-white py-24 md:py-36">
+    <section className="relative overflow-hidden bg-white py-16 md:py-20 lg:py-24">
       {/* Very subtle calming wave pattern overlay */}
       <div className="absolute inset-0 opacity-4">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(147,197,253,0.15)_0%,transparent_50%),radial-gradient(circle_at_70%_30%,rgba(165,180,252,0.1)_0%,transparent_50%)]"></div>
