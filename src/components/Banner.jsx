@@ -50,7 +50,7 @@ const Banner = () => {
             </h2>
             <p className="text-base sm:text-lg md:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-lg mx-auto md:mx-0">
               Connect with experienced tour planners who craft peaceful,
-              meaningful travel experiences just for you.
+              meaningful travel experiences just for your reference.
             </p>
           </div>
 
