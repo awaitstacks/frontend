@@ -29,7 +29,9 @@ const Banner = () => {
   return (
     <section
       ref={bannerRef}
-      className="relative my-16 md:my-24 lg:my-32 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50/30 rounded-3xl shadow-lg mx-4 sm:mx-8 md:mx-12 lg:mx-20 opacity-0 translate-y-12 transition-all duration-1000 ease-out"
+      //className="relative my-16 md:my-24 lg:my-32 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50/30 rounded-3xl shadow-lg mx-4 sm:mx-8 md:mx-12 lg:mx-20 opacity-0 translate-y-12 transition-all duration-1000 ease-out"
+      className="relative my-16 md:my-24 lg:my-32 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50/30 rounded-3xl shadow-lg 
+             mx-4 sm:mx-6 md:mx-8 lg:mx-12 opacity-0 translate-y-12 transition-all duration-1000 ease-out"
     >
       {/* Subtle calming orbs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
