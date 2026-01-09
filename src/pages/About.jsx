@@ -9,7 +9,7 @@ const About = () => {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight">
             About{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700">
-              Us
+              Us...
             </span>
           </h1>
           <p className="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
