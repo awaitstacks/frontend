@@ -3,7 +3,8 @@ import React from "react";
 const TourHeader = () => {
   return (
     //<section className="relative overflow-hidden bg-white py-24 md:py-36">
-    <section className="relative my-16 md:my-24 lg:my-32 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50/30 rounded-3xl shadow-lg mx-4 sm:mx-8 md:mx-12 lg:mx-20 xl:mx-32">      <div className="absolute inset-0 opacity-4">
+    <section className="relative my-10 md:my-16 lg:my-20 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50/30 rounded-3xl shadow-lg mx-4 sm:mx-6 md:mx-10 lg:mx-16 xl:mx-24">
+     <div className="absolute inset-0 opacity-4">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(147,197,253,0.15)_0%,transparent_50%),radial-gradient(circle_at_70%_30%,rgba(165,180,252,0.1)_0%,transparent_50%)]"></div>
       </div>
 
