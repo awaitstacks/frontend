@@ -40,8 +40,18 @@ const CategoryWiseTours = () => {
   };
 
   return (
-    <section className="relative py-16 md:py-20 lg:py-24 bg-gradient-to-b from-white via-blue-50/8 to-white">
-      <div className="max-w-7xl mx-auto px-6 md:px-8 lg:px-10">
+    <section >
+        <div className="
+  w-full 
+  max-w-[94vw] xs:max-w-[94%] sm:max-w-[96%] md:max-w-[92vw] 
+  lg:max-w-[90vw] xl:max-w-[88vw] 2xl:max-w-[86vw]
+  mx-auto
+  rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] lg:rounded-[3rem]
+  backdrop-blur-xl bg-white/45 border border-white/50
+  shadow-xl md:shadow-2xl
+  overflow-hidden
+  p-6 xs:p-8 sm:p-10 md:p-12 lg:p-16 xl:p-20
+">
         <div className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-3">
             Explore Tours by Category

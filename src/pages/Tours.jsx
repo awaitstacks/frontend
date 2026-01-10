@@ -54,14 +54,29 @@ const Tours = () => {
   ];
 
   return (
-    <section className="relative overflow-hidden min-h-screen bg-gradient-to-b from-white via-sky-50/50 to-white py-20 md:py-28">
-      {/* Background blobs */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-40 left-[-10%] w-96 h-96 bg-blue-100/30 rounded-full blur-[120px] animate-pulse-slow"></div>
-        <div className="absolute bottom-40 right-[-10%] w-96 h-96 bg-indigo-100/20 rounded-full blur-[120px] animate-pulse-slow delay-2000"></div>
-      </div>
+<section  className="
+      relative 
+      min-h-[55vh] xs:min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] 
+      flex items-center justify-center 
+      px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 
+      pt-1 xs:pt-5 sm:pt-5 md:pt-6 lg:pt-1   // ← Moves content up a little bit
+      py-12 sm:py-16 md:py-20 lg:py-24 xl:py-28
+    ">
+ 
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10 lg:px-12">
+
+  {/* Main Glass Container with top padding */}
+     <div className="
+  w-full 
+  max-w-[94vw] xs:max-w-[94%] sm:max-w-[96%] md:max-w-[92vw] 
+  lg:max-w-[90vw] xl:max-w-[88vw] 2xl:max-w-[86vw]
+  mx-auto
+  rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] lg:rounded-[3rem]
+  backdrop-blur-xl bg-white/45 border border-white/50
+  shadow-xl md:shadow-2xl
+  overflow-hidden
+  p-6 xs:p-8 sm:p-10 md:p-12 lg:p-16 xl:p-20
+">
         {/* Title */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 tracking-tight">

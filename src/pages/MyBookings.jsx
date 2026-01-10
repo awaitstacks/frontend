@@ -225,7 +225,16 @@ const MyBookings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4 sm:px-6 md:px-8 lg:px-12">
+      <div className="
+        w-full 
+        max-w-[98%] xs:max-w-[96%] sm:max-w-[98%] md:max-w-[96vw] 
+        lg:max-w-[94vw] xl:max-w-[92vw] 2xl:max-w-[90vw]
+        rounded-3xl sm:rounded-[2.5rem] md:rounded-[3rem] lg:rounded-[3.5rem] xl:rounded-[4rem]
+        backdrop-blur-xl bg-white/40 border border-white/50
+        shadow-2xl md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.12)]
+        overflow-hidden
+        p-8 xs:p-10 sm:p-12 md:p-16 lg:p-20 xl:p-24
+      ">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center">
           My Trolly

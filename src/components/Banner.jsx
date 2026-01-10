@@ -29,14 +29,22 @@ const Banner = () => {
   return (
     <section
       ref={bannerRef}
-      //className="relative my-16 md:my-24 lg:my-32 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50/30 rounded-3xl shadow-lg mx-4 sm:mx-8 md:mx-12 lg:mx-20 opacity-0 translate-y-12 transition-all duration-1000 ease-out"
-     className="relative my-16 md:my-24 lg:my-32 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50/30 
-             rounded-3xl shadow-lg  mx-0 opacity-0 translate-y-12 transition-all duration-1000 ease-out"
+          className="
+        w-full 
+        max-w-[94%] xs:max-w-[90%] sm:max-w-5xl md:max-w-6xl 
+        lg:max-w-7xl xl:max-w-[88vw] 2xl:max-w-[84vw]
+        rounded-3xl sm:rounded-[2.5rem] md:rounded-[3rem] lg:rounded-[3.5rem] xl:rounded-[4rem]
+        backdrop-blur bg-white/20 border border-white/50
+        shadow-2xl md:shadow-[0_25px_80px_-12px_rgba(0,0,0,0.12)]
+        overflow-hidden
+        p-8 xs:p-10 sm:p-12 md:p-16 lg:p-20 xl:p-24
+      "
+  
      >
       {/* Subtle calming orbs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-200/10 rounded-full blur-3xl animate-pulse-slow"></div>
-        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-indigo-200/8 rounded-full blur-3xl animate-pulse-slow delay-1000"></div>
+        <div className="absolute -top-20 -left-20 w-80 h-80 bg-white-200 rounded-full blur-3xl animate-pulse-slow"></div>
+        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-white-200 rounded-full blur-2xl animate-pulse-slow delay-1000"></div>
       </div>
 
       <div className="relative grid grid-cols-1 md:grid-cols-2 items-center gap-10 md:gap-16 px-6 sm:px-10 py-16 md:px-16 lg:px-24">
@@ -254,3 +262,5 @@ const Banner = () => {
 };
 
 export default Banner;
+
+

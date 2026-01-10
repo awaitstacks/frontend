@@ -2,7 +2,17 @@ import React from "react";
 
 const Contact = () => {
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-white via-sky-50 to-sky-100 py-12 md:py-20 lg:py-24">
+     <div className="
+        w-full 
+        max-w-[98%] xs:max-w-[96%] sm:max-w-[98%] md:max-w-[96vw] 
+        lg:max-w-[94vw] xl:max-w-[92vw] 2xl:max-w-[90vw]     {/* ← Wider than before */}
+        mx-auto
+        rounded-3xl sm:rounded-[2.5rem] md:rounded-[3rem] lg:rounded-[3.5rem] xl:rounded-[4rem]
+        backdrop-blur-xl bg-white/40 border border-white/50
+        shadow-2xl md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.12)]
+        overflow-hidden
+        p-8 xs:p-10 sm:p-12 md:p-16 lg:p-20 xl:p-24
+      ">
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
         {/* Page Title */}
         <div className="text-center mb-12 md:mb-20 lg:mb-24">

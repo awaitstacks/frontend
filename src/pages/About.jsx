@@ -2,7 +2,16 @@ import React from "react";
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-16 px-6 md:px-12 lg:px-20">
+  <div className="
+        w-full 
+        max-w-[98%] xs:max-w-[96%] sm:max-w-[98%] md:max-w-[96vw] 
+        lg:max-w-[94vw] xl:max-w-[92vw] 2xl:max-w-[90vw]
+        rounded-3xl sm:rounded-[2.5rem] md:rounded-[3rem] lg:rounded-[3.5rem] xl:rounded-[4rem]
+        backdrop-blur-xl bg-white/40 border border-white/50
+        shadow-2xl md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.12)]
+        overflow-hidden
+        p-8 xs:p-10 sm:p-12 md:p-16 lg:p-20 xl:p-24
+      ">
       <div className="max-w-7xl mx-auto">
         {/* Hero Heading */}
         <div className="text-center mb-20">

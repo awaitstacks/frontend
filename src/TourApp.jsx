@@ -70,7 +70,7 @@ const TourApp = () => {
       </main>
 
       {/* Footer - Clean glass effect on top of background */}
-      <footer className="relative z-20 mx-4 sm:mx-[10%] mt-12 pt-8 border-t border-gray-300/60 bg-white/80 backdrop-blur-md">
+      <footer className="relative z-20 mx-6 sm:mx-[11%] mt-12 pt-8 ">
         <Footer />
       </footer>
 

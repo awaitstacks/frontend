@@ -58,12 +58,28 @@ const MyProfile = () => {
 
   return (
     <>
-      <div className="relative min-h-screen bg-gradient-to-b from-white via-sky-50 to-sky-100 py-12 md:py-20">
+        <div className="
+        w-full 
+        max-w-[98%] xs:max-w-[96%] sm:max-w-[98%] md:max-w-[96vw] 
+        lg:max-w-[94vw] xl:max-w-[92vw] 2xl:max-w-[90vw]
+        rounded-3xl sm:rounded-[2.5rem] md:rounded-[3rem] lg:rounded-[3.5rem] xl:rounded-[4rem]
+        backdrop-blur-xl bg-white/40 border border-white/50
+        shadow-2xl md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.12)]
+        overflow-hidden
+        p-8 xs:p-10 sm:p-12 md:p-16 lg:p-20 xl:p-24
+      ">
         {/* Subtle floating icons */}
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
+         <div className="mb-10 text-center">
+            <h1 className="text-3xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">
+              My Profile
+            </h1>
+            <div className="h-1 w-20 bg-blue-600 mx-auto mt-4 rounded-full opacity-50"></div>
+          </div>
           <div className="glass-card rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl border border-white/50">
             {/* Header: Profile Image + Name */}
+            
             <div className="text-center mb-10">
               <div className="relative inline-block group">
                 {isEdit ? (
@@ -447,3 +463,5 @@ const MyProfile = () => {
 };
 
 export default MyProfile;
+
+
