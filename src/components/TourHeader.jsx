@@ -114,10 +114,10 @@ const TourHeader = () => {
   return (
     <div className="
       relative 
-      min-h-[65vh] xs:min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] 
-      flex items-center justify-center 
-      px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 
-      py-12 sm:py-16 md:py-20 lg:py-24 xl:py-28
+    min-h-[65vh] xs:min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] 
+    flex items-center justify-center 
+    px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 
+    pt-0 pb-12 sm:pb-16 md:pb-20 lg:pb-24 xl:pb-28
     ">
       {/* Wider glass container */}
       <div className="

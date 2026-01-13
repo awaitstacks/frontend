@@ -11,7 +11,7 @@ const TourBooking = () => {
     useContext(TourAppContext);
 
   const [tourInfo, setTourInfo] = useState(null);
-  const [bookingType, setBookingType] = useState("online");
+  const [bookingType, setBookingType] = useState("offline");
 
   const [transportPoints, setTransportPoints] = useState({
     boarding: [],
@@ -372,7 +372,15 @@ const TourBooking = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-6 px-4 sm:py-8 sm:px-6 md:py-12 md:px-8 lg:px-12">
+    <div className="w-full 
+        max-w-[98%] xs:max-w-[96%] sm:max-w-[98%] md:max-w-[96vw] 
+        lg:max-w-[94vw] xl:max-w-[92vw] 2xl:max-w-[90vw]
+        rounded-3xl sm:rounded-[2.5rem] md:rounded-[3rem] lg:rounded-[3.5rem] xl:rounded-[4rem]
+        backdrop-blur-xl bg-white/40 border border-white/50
+        shadow-2xl md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.12)]
+        overflow-hidden
+        p-8 xs:p-10 sm:p-12 md:p-16 lg:p-20 xl:p-24
+      ">
       <div className="max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto">
         {/* Tour Header */}
         <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-lg p-6 sm:p-8 md:p-10 mb-6 sm:mb-8 md:mb-10 text-center transition-all duration-500 hover:shadow-xl">
@@ -426,13 +434,10 @@ const TourBooking = () => {
         {/* Important Notice Alert - Same as My Trolly Page */}
         <div className="mb-8 px-6 py-5 bg-amber-50 border border-amber-300 rounded-2xl text-amber-900 shadow-md">
           <p className="text-center font-medium leading-relaxed">
-            <span className="font-semibold">Important Notice:</span> Online
-            payments are currently undergoing security testing and awaiting
-            final approval.
+            <span className="font-semibold">Important Notice:</span> To avoid higher gateway charges, we are currently processing all bookings in offline mode only.
             <br />
-            For faster booking confirmation, please choose{" "}
-            <span className="font-semibold">Offline Booking</span>. We will
-            share payment details with you immediately after you select it.
+            Please proceed with{" "}
+            <span className="font-semibold">Offline Booking</span>. We will immediately share the payment details via WhatsApp once you confirm. Kindly complete the payment and inform us for instant booking confirmation. Thank you for your understanding.
           </p>
         </div>
 
@@ -447,7 +452,7 @@ const TourBooking = () => {
               value={bookingType}
               onChange={(e) => setBookingType(e.target.value)}
             >
-              {/* <option value="online">Online Payment</option> */}
+              {/* <option value="online">Online Payment</option>  */}
               <option value="offline">Offline Booking</option>
             </select>
           </div>

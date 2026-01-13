@@ -1,3 +1,546 @@
+// import React, { useContext, useEffect, useState } from "react";
+// import { useNavigate, useParams } from "react-router-dom";
+// import { TourAppContext } from "../context/TourAppContext.jsx";
+
+// const Tours = () => {
+//   const { batch } = useParams();
+//   const navigate = useNavigate();
+//   const { tours, currencySymbol } = useContext(TourAppContext);
+
+//   const [filterTour, setFilterTour] = useState([]);
+//   const [visibleCount, setVisibleCount] = useState(5);
+//   const [searchTerm, setSearchTerm] = useState("");
+
+//   useEffect(() => {
+//     let filtered = tours;
+
+//     if (batch) {
+//       filtered = filtered.filter((tour) => tour.batch === batch);
+//     }
+
+//     if (searchTerm.trim()) {
+//       filtered = filtered.filter((tour) =>
+//         tour.title.toLowerCase().includes(searchTerm.toLowerCase())
+//       );
+//     }
+
+//     filtered = filtered.sort((a, b) => {
+//       return new Date(b.createdAt) - new Date(a.createdAt);
+//     });
+
+//     setFilterTour(filtered);
+//     setVisibleCount(5);
+//   }, [tours, batch, searchTerm]);
+
+//   const handleCardClick = (tourId) => {
+//     navigate(`/tour-details/${tourId}`);
+//     window.scrollTo({ top: 0, behavior: "smooth" });
+//   };
+
+//   const handleShowMore = () => {
+//     setVisibleCount((prev) => prev + 5);
+//   };
+
+//   const displayedTours = filterTour.slice(0, visibleCount);
+
+//   const categories = [
+//     { name: "All Tours", value: null },
+//     { name: "Devotional", value: "Devotional" },
+//     { name: "Religious", value: "Relegious" },
+//     { name: "Honeymoon", value: "Honeymoon" },
+//     { name: "Jolly", value: "Jolly" },
+//     { name: "Spiritual", value: "Spritual" },
+//     { name: "Spiritual + Sightseeing", value: "Spritual+Sightseeing" },
+//   ];
+
+//   return (
+// <section  className="
+//       relative 
+//       min-h-[55vh] xs:min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] 
+//       flex items-center justify-center 
+//       px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 
+//       pt-1 xs:pt-5 sm:pt-5 md:pt-6 lg:pt-1   // ← Moves content up a little bit
+//       py-12 sm:py-16 md:py-20 lg:py-24 xl:py-28
+//     ">
+
+
+
+//   {/* Main Glass Container with top padding */}
+//      <div className="
+//   w-full 
+//   max-w-[94vw] xs:max-w-[94%] sm:max-w-[96%] md:max-w-[92vw] 
+//   lg:max-w-[90vw] xl:max-w-[88vw] 2xl:max-w-[86vw]
+//   mx-auto
+//   rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] lg:rounded-[3rem]
+//   backdrop-blur-xl bg-white/45 border border-white/50
+//   shadow-xl md:shadow-2xl
+//   overflow-hidden
+//   p-6 xs:p-8 sm:p-10 md:p-12 lg:p-16 xl:p-20
+// ">
+//         {/* Title */}
+//         <div className="text-center mb-16">
+//           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 tracking-tight">
+//             {batch ? (
+//               <>
+//                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700">
+//                   {batch}
+//                 </span>{" "}
+//                 Journeys
+//               </>
+//             ) : (
+//               "Explore All Our Tours"
+//             )}
+//           </h1>
+//           <p className="text-gray-600 max-w-xl mx-auto text-lg">
+//             Carefully curated experiences for a journey of peace and discovery.
+//           </p>
+//         </div>
+
+//         {/* Filters + Search */}
+//         <div className="mb-12 flex flex-col sm:flex-row gap-6 items-center justify-between">
+//           <div className="flex flex-wrap justify-center gap-4">
+//             {categories.map((cat) => (
+//               <button
+//                 key={cat.value || "all"}
+//                 onClick={() =>
+//                   navigate(cat.value ? `/tours/${cat.value}` : "/tours")
+//                 }
+//                 className={`px-7 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border backdrop-blur-md ${
+//                   batch === cat.value || (!batch && cat.value === null)
+//                     ? "bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-200/30 scale-105"
+//                     : "bg-white/70 border-gray-200 text-gray-700 hover:bg-white/90 hover:border-blue-300 hover:text-blue-700"
+//                 }`}
+//               >
+//                 {cat.name}
+//               </button>
+//             ))}
+//           </div>
+
+//           <input
+//             type="text"
+//             placeholder="Search tours by name..."
+//             value={searchTerm}
+//             onChange={(e) => setSearchTerm(e.target.value)}
+//             className="w-full sm:w-80 px-6 py-3 rounded-full border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-gray-800 placeholder-gray-500"
+//           />
+//         </div>
+
+//         {/* Tour Grid - EXACT SAME as TopTours */}
+//         {filterTour.length === 0 ? (
+//           <div className="text-center py-20 bg-white/70 backdrop-blur-md rounded-3xl border border-gray-100">
+//             <p className="text-gray-500 font-medium text-lg">
+//               {searchTerm || batch
+//                 ? "No tours found matching your search."
+//                 : "No tours available at the moment."}
+//             </p>
+//             {(searchTerm || batch) && (
+//               <button
+//                 onClick={() => {
+//                   setSearchTerm("");
+//                   navigate("/tours");
+//                 }}
+//                 className="mt-4 text-blue-600 font-bold hover:underline"
+//               >
+//                 Clear filters & View all tours
+//               </button>
+//             )}
+//           </div>
+//         ) : (
+//           <>
+//             {/* 2x2 Grid - Same as TopTours */}
+//             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 max-w-3xl mx-auto">
+//               {displayedTours.map((item) => (
+//                 <div
+//                   key={item._id}
+//                   onClick={() => handleCardClick(item._id)}
+//                   className="group relative bg-white rounded-2xl overflow-hidden shadow hover:shadow-md transition-all duration-500 hover:-translate-y-2 cursor-pointer border border-gray-50"
+//                 >
+//                   {/* Hover glow */}
+//                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/3 to-indigo-300/3 opacity-0 group-hover:opacity-100 transition-opacity duration-600"></div>
+
+//                   {/* Image - Same size as TopTours */}
+//                   <div className="relative overflow-hidden">
+//                     <img
+//                       src={item.titleImage}
+//                       alt={item.title}
+//                       className="w-full h-40 md:h-44 object-cover group-hover:scale-105 transition-transform duration-800"
+//                     />
+//                   </div>
+
+//                   {/* Content - Identical */}
+//                   <div className="relative p-4 md:p-5 text-left">
+//                     <div className="flex items-center gap-2 text-xs mb-2">
+//                       <div
+//                         className={`w-1.5 h-1.5 rounded-full ${
+//                           item.available ? "bg-green-500" : "bg-gray-400"
+//                         }`}
+//                       />
+//                       <span
+//                         className={`text-xs font-medium ${
+//                           item.available ? "text-green-700" : "text-gray-500"
+//                         }`}
+//                       >
+//                         {item.available ? "Available" : "Sold Out"}
+//                       </span>
+//                     </div>
+
+//                     <h3 className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors duration-400 line-clamp-2 mb-1">
+//                       {item.title}
+//                     </h3>
+
+//                     <div className="space-y-1 text-xs text-gray-600">
+//                       <p className="text-gray-500">Batch: {item.batch}</p>
+//                       <p className="text-sm font-medium text-gray-800">
+//                         {currencySymbol}
+//                         {item.price.doubleSharing.toLocaleString()}
+//                       </p>
+//                       <p className="text-xs text-gray-500">
+//                         {item.duration.days}D/{item.duration.nights}N
+//                       </p>
+//                     </div>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+
+//             {/* Show More */}
+//             {filterTour.length > visibleCount && (
+//               <div className="text-center mt-16">
+//                 <button
+//                   onClick={handleShowMore}
+//                   className="px-10 py-4 bg-indigo-100 text-indigo-700 rounded-xl font-medium hover:bg-indigo-200 transition-all shadow-md hover:shadow-lg"
+//                 >
+//                   Show More Tours
+//                 </button>
+//               </div>
+//             )}
+//           </>
+//         )}
+//       </div>
+
+//       {/* Pulse animation */}
+//       <style>{`
+//         @keyframes pulse-slow {
+//           0%, 100% { transform: scale(1); opacity: 0.2; }
+//           50% { transform: scale(1.05); opacity: 0.3; }
+//         }
+//         .animate-pulse-slow { animation: pulse-slow 15s ease-in-out infinite; }
+//         .delay-2000 { animation-delay: 2s; }
+//       `}</style>
+//     </section>
+//   );
+// };
+
+// export default Tours;
+
+// import React, { useContext, useEffect, useState } from "react";
+// import { useNavigate, useParams } from "react-router-dom";
+// import { TourAppContext } from "../context/TourAppContext.jsx";
+
+// const Tours = () => {
+//   const { batch } = useParams();
+//   const navigate = useNavigate();
+//   const { tours, currencySymbol, availableYears, getToursByYear } =
+//     useContext(TourAppContext);
+
+//   const [filterTour, setFilterTour] = useState([]);
+//   const [visibleCount, setVisibleCount] = useState(8);
+//   const [searchTerm, setSearchTerm] = useState("");
+
+//   // Extra filters
+//   const [selectedYear, setSelectedYear] = useState("all");
+//   const [availability, setAvailability] = useState("both"); // "both" | "available" | "soldout"
+
+//   // Keep original filtering + add year & availability
+//   useEffect(() => {
+//     let filtered = tours;
+
+//     // 1. Category from URL
+//     if (batch) {
+//       filtered = filtered.filter((tour) => tour.batch === batch);
+//     }
+
+//     // 2. Search term
+//     if (searchTerm.trim()) {
+//       filtered = filtered.filter((tour) =>
+//         tour.title.toLowerCase().includes(searchTerm.toLowerCase())
+//       );
+//     }
+
+//     // 3. Year filter
+//     if (selectedYear !== "all") {
+//       filtered = filtered.filter((tour) => {
+//         if (!tour.lastBookingDate) return false;
+//         const tourYear = new Date(tour.lastBookingDate).getFullYear().toString();
+//         return tourYear === selectedYear;
+//       });
+//     }
+
+//     // 4. Availability filter
+//     if (availability === "available") {
+//       filtered = filtered.filter((tour) => tour.available === true);
+//     } else if (availability === "soldout") {
+//       filtered = filtered.filter((tour) => tour.available === false);
+//     }
+//     // "both" → no additional filter
+
+//     // Sort newest first
+//     filtered = filtered.sort((a, b) => {
+//       return new Date(b.createdAt) - new Date(a.createdAt);
+//     });
+
+//     setFilterTour(filtered);
+//     setVisibleCount(8);
+//   }, [tours, batch, searchTerm, selectedYear, availability]);
+
+//   const handleCardClick = (tourId) => {
+//     navigate(`/tour-details/${tourId}`);
+//     window.scrollTo({ top: 0, behavior: "smooth" });
+//   };
+
+//   const handleShowMore = () => {
+//     setVisibleCount((prev) => prev + 8);
+//   };
+
+//   const displayedTours = filterTour.slice(0, visibleCount);
+
+//   const categories = [
+//     { name: "All Tours", value: null },
+//     { name: "Devotional", value: "Devotional" },
+//     { name: "Religious", value: "Religious" },
+//     { name: "Honeymoon", value: "Honeymoon" },
+//     { name: "Jolly", value: "Jolly" },
+//     { name: "Spiritual", value: "Spiritual" },
+//     { name: "Spiritual + Sightseeing", value: "Spiritual+Sightseeing" },
+//   ];
+
+//   return (
+//     <section
+//       className="
+//       relative 
+//       min-h-[55vh] xs:min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] 
+//       flex items-center justify-center 
+//       px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 
+//       pt-1 xs:pt-5 sm:pt-5 md:pt-6 lg:pt-1
+//       py-12 sm:py-16 md:py-20 lg:py-24 xl:py-28
+//     "
+//     >
+//       <div
+//         className="
+//         w-full 
+//         max-w-[94vw] xs:max-w-[94%] sm:max-w-[96%] md:max-w-[92vw] 
+//         lg:max-w-[90vw] xl:max-w-[88vw] 2xl:max-w-[86vw]
+//         mx-auto
+//         rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] lg:rounded-[3rem]
+//         backdrop-blur-xl bg-white/45 border border-white/50
+//         shadow-xl md:shadow-2xl
+//         overflow-hidden
+//         p-6 xs:p-8 sm:p-10 md:p-12 lg:p-16 xl:p-20
+//       "
+//       >
+//         {/* Title */}
+//         <div className="text-center mb-10">
+//           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-3 tracking-tight">
+//             {batch ? (
+//               <>
+//                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700">
+//                   {batch}
+//                 </span>{" "}
+//                 Journeys
+//               </>
+//             ) : (
+//               "Explore All Our Tours"
+//             )}
+//           </h1>
+//           <p className="text-gray-600 max-w-xl mx-auto text-lg">
+//             Carefully curated experiences for a journey of peace and discovery.
+//           </p>
+//         </div>
+
+//         {/* Extra filters – two rows */}
+//         <div className="mb-10 space-y-6">
+//           {/* Row 1: All Tours + Years */}
+//           <div className="flex flex-wrap gap-3 justify-center">
+//             <button
+//               onClick={() => setSelectedYear("all")}
+//               className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+//                 selectedYear === "all"
+//                   ? "bg-indigo-600 text-white shadow-md"
+//                   : "bg-white/70 text-gray-700 hover:bg-indigo-50"
+//               }`}
+//             >
+//               All Tours
+//             </button>
+//             {availableYears.map((year) => (
+//               <button
+//                 key={year}
+//                 onClick={() => setSelectedYear(year.toString())}
+//                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+//                   selectedYear === year.toString()
+//                     ? "bg-indigo-600 text-white shadow-md"
+//                     : "bg-white/70 text-gray-700 hover:bg-indigo-50"
+//                 }`}
+//               >
+//                 {year}
+//               </button>
+//             ))}
+//           </div>
+
+//           {/* Row 2: Availability + original category buttons */}
+//           <div className="flex flex-wrap gap-3 justify-center">
+//             {["Both", "Available", "Sold Out"].map((label) => {
+//               const value = label.toLowerCase().replace(" ", "");
+//               return (
+//                 <button
+//                   key={label}
+//                   onClick={() => setAvailability(value)}
+//                   className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+//                     availability === value
+//                       ? label === "Both"
+//                         ? "bg-indigo-600 text-white"
+//                         : label === "Available"
+//                         ? "bg-green-600 text-white"
+//                         : "bg-red-600 text-white"
+//                       : "bg-white/70 text-gray-700 hover:bg-gray-100"
+//                   } shadow-sm`}
+//                 >
+//                   {label}
+//                 </button>
+//               );
+//             })}
+
+//             {/* Original category buttons */}
+//             {categories.map((cat) => (
+//               <button
+//                 key={cat.value || "all"}
+//                 onClick={() =>
+//                   navigate(cat.value ? `/tours/${cat.value}` : "/tours")
+//                 }
+//                 className={`px-6 py-2 rounded-full text-sm font-medium border transition-all ${
+//                   batch === cat.value || (!batch && cat.value === null)
+//                     ? "bg-blue-600 text-white border-blue-600 shadow-md"
+//                     : "bg-white/70 border-gray-200 text-gray-700 hover:bg-white/90 hover:border-blue-300"
+//                 }`}
+//               >
+//                 {cat.name}
+//               </button>
+//             ))}
+//           </div>
+
+//           {/* Search – moved below for better spacing */}
+//           <div className="flex justify-center">
+//             <input
+//               type="text"
+//               placeholder="Search tours by name..."
+//               value={searchTerm}
+//               onChange={(e) => setSearchTerm(e.target.value)}
+//               className="w-full max-w-md px-6 py-3 rounded-full border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-gray-800 placeholder-gray-500"
+//             />
+//           </div>
+//         </div>
+
+//         {/* Tour Grid */}
+//         {filterTour.length === 0 ? (
+//           <div className="text-center py-20 bg-white/70 backdrop-blur-md rounded-3xl border border-gray-100">
+//             <p className="text-gray-500 font-medium text-lg">
+//               {searchTerm || batch || selectedYear !== "all" || availability !== "both"
+//                 ? "No tours found matching your filters."
+//                 : "No tours available at the moment."}
+//             </p>
+//             <button
+//               onClick={() => {
+//                 setSearchTerm("");
+//                 setSelectedYear("all");
+//                 setAvailability("both");
+//                 navigate("/tours");
+//               }}
+//               className="mt-4 text-blue-600 font-bold hover:underline"
+//             >
+//               Reset filters
+//             </button>
+//           </div>
+//         ) : (
+//           <>
+//             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+//               {displayedTours.map((item) => (
+//                 <div
+//                   key={item._id}
+//                   onClick={() => handleCardClick(item._id)}
+//                   className="group relative bg-white rounded-2xl overflow-hidden shadow hover:shadow-md transition-all duration-500 hover:-translate-y-2 cursor-pointer border border-gray-50"
+//                 >
+//                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/3 to-indigo-300/3 opacity-0 group-hover:opacity-100 transition-opacity duration-600"></div>
+
+//                   <div className="relative overflow-hidden">
+//                     <img
+//                       src={item.titleImage}
+//                       alt={item.title}
+//                       className="w-full h-40 md:h-44 object-cover group-hover:scale-105 transition-transform duration-800"
+//                     />
+//                   </div>
+
+//                   <div className="relative p-4 md:p-5 text-left">
+//                     <div className="flex items-center gap-2 text-xs mb-2">
+//                       <div
+//                         className={`w-1.5 h-1.5 rounded-full ${
+//                           item.available ? "bg-green-500" : "bg-gray-400"
+//                         }`}
+//                       />
+//                       <span
+//                         className={`text-xs font-medium ${
+//                           item.available ? "text-green-700" : "text-gray-500"
+//                         }`}
+//                       >
+//                         {item.available ? "Available" : "Sold Out"}
+//                       </span>
+//                     </div>
+
+//                     <h3 className="text-base md:text-lg font-semibold text-gray-800 group-hover:text-blue-700 transition-colors duration-400 line-clamp-2 mb-1">
+//                       {item.title}
+//                     </h3>
+
+//                     <div className="space-y-1 text-xs text-gray-600">
+//                       <p className="text-gray-500">Batch: {item.batch}</p>
+//                       <p className="text-sm font-medium text-gray-800">
+//                         {currencySymbol}
+//                         {item.price.doubleSharing.toLocaleString()}
+//                       </p>
+//                       <p className="text-xs text-gray-500">
+//                         {item.duration.days}D / {item.duration.nights}N
+//                       </p>
+//                     </div>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+
+//             {filterTour.length > visibleCount && (
+//               <div className="text-center mt-16">
+//                 <button
+//                   onClick={handleShowMore}
+//                   className="px-10 py-4 bg-indigo-100 text-indigo-700 rounded-xl font-medium hover:bg-indigo-200 transition-all shadow-md hover:shadow-lg"
+//                 >
+//                   Show More Tours
+//                 </button>
+//               </div>
+//             )}
+//           </>
+//         )}
+//       </div>
+
+//       <style>{`
+//         @keyframes pulse-slow {
+//           0%, 100% { transform: scale(1); opacity: 0.2; }
+//           50% { transform: scale(1.05); opacity: 0.3; }
+//         }
+//         .animate-pulse-slow { animation: pulse-slow 15s ease-in-out infinite; }
+//         .delay-2000 { animation-delay: 2s; }
+//       `}</style>
+//     </section>
+//   );
+// };
+
+// export default Tours;
+
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TourAppContext } from "../context/TourAppContext.jsx";
@@ -5,17 +548,38 @@ import { TourAppContext } from "../context/TourAppContext.jsx";
 const Tours = () => {
   const { batch } = useParams();
   const navigate = useNavigate();
-  const { tours, currencySymbol } = useContext(TourAppContext);
+  const { tours, currencySymbol, availableYears } = useContext(TourAppContext);
 
   const [filterTour, setFilterTour] = useState([]);
   const [visibleCount, setVisibleCount] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedYear, setSelectedYear] = useState("all");
+  const [availability, setAvailability] = useState("available"); // Default blinking Available
+  const [activeCategory, setActiveCategory] = useState(null);
 
   useEffect(() => {
-    let filtered = tours;
+    let filtered = tours || [];
 
     if (batch) {
       filtered = filtered.filter((tour) => tour.batch === batch);
+    }
+
+    if (activeCategory) {
+      filtered = filtered.filter((tour) => tour.batch === activeCategory);
+    }
+
+    if (selectedYear !== "all") {
+      filtered = filtered.filter((tour) => {
+        if (!tour.lastBookingDate) return false;
+        const tourYear = new Date(tour.lastBookingDate).getFullYear().toString();
+        return tourYear === selectedYear;
+      });
+    }
+
+    if (availability === "available") {
+      filtered = filtered.filter((tour) => tour.available === true);
+    } else if (availability === "soldout") {
+      filtered = filtered.filter((tour) => tour.available === false);
     }
 
     if (searchTerm.trim()) {
@@ -30,7 +594,7 @@ const Tours = () => {
 
     setFilterTour(filtered);
     setVisibleCount(5);
-  }, [tours, batch, searchTerm]);
+  }, [tours, batch, activeCategory, selectedYear, availability, searchTerm]);
 
   const handleCardClick = (tourId) => {
     navigate(`/tour-details/${tourId}`);
@@ -44,99 +608,168 @@ const Tours = () => {
   const displayedTours = filterTour.slice(0, visibleCount);
 
   const categories = [
-    { name: "All Tours", value: null },
     { name: "Devotional", value: "Devotional" },
-    { name: "Religious", value: "Relegious" },
+    { name: "Religious", value: "Religious" },
     { name: "Honeymoon", value: "Honeymoon" },
     { name: "Jolly", value: "Jolly" },
-    { name: "Spiritual", value: "Spritual" },
-    { name: "Spiritual + Sightseeing", value: "Spritual+Sightseeing" },
+    { name: "Spiritual", value: "Spiritual" },
+    { name: "Spiritual + Sightseeing", value: "Spiritual+Sightseeing" },
   ];
 
+  // Reset active category on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.category-button')) {
+        setActiveCategory(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   return (
-<section  className="
+    <section
+      className="
       relative 
-      min-h-[55vh] xs:min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] 
-      flex items-center justify-center 
-      px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 
-      pt-1 xs:pt-5 sm:pt-5 md:pt-6 lg:pt-1   // ← Moves content up a little bit
-      py-12 sm:py-16 md:py-20 lg:py-24 xl:py-28
-    ">
- 
-
-
-  {/* Main Glass Container with top padding */}
-     <div className="
-  w-full 
-  max-w-[94vw] xs:max-w-[94%] sm:max-w-[96%] md:max-w-[92vw] 
-  lg:max-w-[90vw] xl:max-w-[88vw] 2xl:max-w-[86vw]
-  mx-auto
-  rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] lg:rounded-[3rem]
-  backdrop-blur-xl bg-white/45 border border-white/50
-  shadow-xl md:shadow-2xl
-  overflow-hidden
-  p-6 xs:p-8 sm:p-10 md:p-12 lg:p-16 xl:p-20
-">
+    min-h-[65vh] xs:min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] lg:min-h-[85vh] 
+    flex items-center justify-center 
+    px-4 xs:px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 
+    pt-0 pb-12 sm:pb-16 md:pb-20 lg:pb-24 xl:pb-28
+    "
+    >
+      {/* Main Glass Container */}
+      <div className="
+        w-full 
+        max-w-[94vw] xs:max-w-[94%] sm:max-w-[96%] md:max-w-[92vw] 
+        lg:max-w-[90vw] xl:max-w-[88vw] 2xl:max-w-[86vw]
+        mx-auto
+        rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] lg:rounded-[3rem]
+        backdrop-blur-xl bg-white/45 border border-white/50
+        shadow-xl md:shadow-2xl
+        overflow-hidden
+        p-6 xs:p-8 sm:p-10 md:p-12 lg:p-16 xl:p-20
+      ">
         {/* Title */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4 tracking-tight">
-            {batch ? (
-              <>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700">
-                  {batch}
-                </span>{" "}
-                Journeys
-              </>
-            ) : (
-              "Explore All Our Tours"
-            )}
+            Explore All Our Tours
           </h1>
           <p className="text-gray-600 max-w-xl mx-auto text-lg">
             Carefully curated experiences for a journey of peace and discovery.
           </p>
         </div>
 
-        {/* Filters + Search */}
-        <div className="mb-12 flex flex-col sm:flex-row gap-6 items-center justify-between">
-          <div className="flex flex-wrap justify-center gap-4">
+        {/* Filters */}
+        <div className="mb-12 space-y-6">
+          {/* Top Row */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 flex-wrap">
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+              <button
+                onClick={() => setSelectedYear("all")}
+                className={`px-7 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border backdrop-blur-md ${selectedYear === "all"
+                    ? "bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-200/30 scale-105"
+                    : "bg-white/70 border-gray-200 text-gray-700 hover:bg-white/90 hover:border-blue-300 hover:text-blue-700"
+                  }`}
+              >
+                All Tours
+              </button>
+
+              {/* Year Dropdown */}
+              <div className="relative min-w-[160px]">
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="
+                 appearance-none w-full px-6 py-3 pr-12 
+                 rounded-full bg-white/70 backdrop-blur-xl 
+                 border border-white/40 shadow-lg shadow-black/5
+                 text-gray-800 text-sm font-medium
+                 focus:outline-none focus:ring-4 focus:ring-indigo-300/50 focus:border-indigo-500
+                 transition-all duration-300 cursor-pointer
+                 hover:bg-white/90 hover:shadow-xl"
+                >
+                  <option value="all">All Years</option>
+                  {availableYears?.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+                {/* Custom elegant arrow */}
+                <span className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-indigo-500 text-base font-bold">
+                  ▼
+                </span>
+              </div>
+            </div>
+
+            {/* Availability Buttons - Available blinks by default */}
+            <div className="flex gap-3 flex-wrap justify-center">
+              {["Available", "Sold Out"].map((label) => {
+                const value = label.toLowerCase().replace(" ", "");
+                return (
+                  <button
+                    key={label}
+                    onClick={() => setAvailability(value)}
+                    className={`px-7 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border backdrop-blur-md ${availability === value
+                        ? label === "Available"
+                          ? "bg-green-600 text-white border-green-600 shadow-xl shadow-green-200/30 scale-105" // Blinking Available
+                          : "bg-red-600 text-white border-red-600 shadow-xl shadow-red-200/30 scale-105"
+                        : "bg-white/70 border-gray-200 text-gray-700 hover:bg-white/90 hover:border-gray-300 hover:text-gray-700"
+                      }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Category Buttons */}
+          <div className="flex flex-wrap gap-4 justify-center">
             {categories.map((cat) => (
               <button
                 key={cat.value || "all"}
-                onClick={() =>
-                  navigate(cat.value ? `/tours/${cat.value}` : "/tours")
-                }
-                className={`px-7 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border backdrop-blur-md ${
-                  batch === cat.value || (!batch && cat.value === null)
+                onClick={() => {
+                  setActiveCategory(cat.value);
+                  navigate(cat.value ? `/tours/${cat.value}` : "/tours");
+                }}
+                className={`category-button px-7 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border backdrop-blur-md ${activeCategory === cat.value
                     ? "bg-blue-600 text-white border-blue-600 shadow-xl shadow-blue-200/30 scale-105"
                     : "bg-white/70 border-gray-200 text-gray-700 hover:bg-white/90 hover:border-blue-300 hover:text-blue-700"
-                }`}
+                  }`}
               >
                 {cat.name}
               </button>
             ))}
           </div>
 
-          <input
-            type="text"
-            placeholder="Search tours by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:w-80 px-6 py-3 rounded-full border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-gray-800 placeholder-gray-500"
-          />
+          {/* Search */}
+          <div className="flex justify-center">
+            <input
+              type="text"
+              placeholder="Search tours by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-80 px-6 py-3 rounded-full border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all text-gray-800 placeholder-gray-500"
+            />
+          </div>
         </div>
 
-        {/* Tour Grid - EXACT SAME as TopTours */}
+        {/* Tour Grid */}
         {filterTour.length === 0 ? (
           <div className="text-center py-20 bg-white/70 backdrop-blur-md rounded-3xl border border-gray-100">
             <p className="text-gray-500 font-medium text-lg">
-              {searchTerm || batch
-                ? "No tours found matching your search."
+              {searchTerm || batch || selectedYear !== "all" || availability !== "both" || activeCategory
+                ? "No tours found matching your filters."
                 : "No tours available at the moment."}
             </p>
-            {(searchTerm || batch) && (
+            {(searchTerm || batch || activeCategory) && (
               <button
                 onClick={() => {
                   setSearchTerm("");
+                  setSelectedYear("all");
+                  setAvailability("available"); // Reset to blinking Available
+                  setActiveCategory(null);
                   navigate("/tours");
                 }}
                 className="mt-4 text-blue-600 font-bold hover:underline"
@@ -147,7 +780,6 @@ const Tours = () => {
           </div>
         ) : (
           <>
-            {/* 2x2 Grid - Same as TopTours */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 max-w-3xl mx-auto">
               {displayedTours.map((item) => (
                 <div
@@ -158,7 +790,7 @@ const Tours = () => {
                   {/* Hover glow */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-300/3 to-indigo-300/3 opacity-0 group-hover:opacity-100 transition-opacity duration-600"></div>
 
-                  {/* Image - Same size as TopTours */}
+                  {/* Image */}
                   <div className="relative overflow-hidden">
                     <img
                       src={item.titleImage}
@@ -167,18 +799,16 @@ const Tours = () => {
                     />
                   </div>
 
-                  {/* Content - Identical */}
+                  {/* Content */}
                   <div className="relative p-4 md:p-5 text-left">
                     <div className="flex items-center gap-2 text-xs mb-2">
                       <div
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          item.available ? "bg-green-500" : "bg-gray-400"
-                        }`}
+                        className={`w-1.5 h-1.5 rounded-full ${item.available ? "bg-green-500" : "bg-gray-400"
+                          }`}
                       />
                       <span
-                        className={`text-xs font-medium ${
-                          item.available ? "text-green-700" : "text-gray-500"
-                        }`}
+                        className={`text-xs font-medium ${item.available ? "text-green-700" : "text-gray-500"
+                          }`}
                       >
                         {item.available ? "Available" : "Sold Out"}
                       </span>
@@ -232,3 +862,11 @@ const Tours = () => {
 };
 
 export default Tours;
+
+
+
+
+
+
+
+
