@@ -215,13 +215,25 @@ const TourBooking = () => {
       return;
     }
 
-    for (let t of travellers) {
+    for (let [idx, t] of travellers.entries()) {
       const age = Number(t.age);
+
+      // First Name & Last Name missing check (NEW - as you asked)
+      if (!t.firstName?.trim()) {
+        toast.error(`Traveller ${idx + 1}: First Name is required (As per Aadhar).`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!t.lastName?.trim()) {
+        toast.error(`Traveller ${idx + 1}: Last Name is required (As per Aadhar).`);
+        setIsSubmitting(false);
+        return;
+      }
 
       if (isNaN(age) || age < 1) {
         toast.error(
-          `Invalid age for traveller: ${
-            t.firstName || "Unnamed"
+          `Invalid age for traveller: ${t.firstName || "Unnamed"
           }. Age must be greater than 0.`
         );
         setIsSubmitting(false);
@@ -229,8 +241,7 @@ const TourBooking = () => {
       }
       if (age < 6) {
         toast.error(
-          `Age must be at least 6 years for traveller: ${
-            t.firstName || "Unnamed"
+          `Age must be at least 6 years for traveller: ${t.firstName || "Unnamed"
           }.`
         );
         setIsSubmitting(false);
@@ -268,8 +279,7 @@ const TourBooking = () => {
       }
       if (t.packageType === "variant" && t.variantPackageIndex === null) {
         toast.error(
-          `Please select a variant package for traveller: ${
-            t.firstName || "Unnamed"
+          `Please select a variant package for traveller: ${t.firstName || "Unnamed"
           }.`
         );
         setIsSubmitting(false);
@@ -279,9 +289,9 @@ const TourBooking = () => {
 
     const billingData =
       billingAddress.addressLine1.trim() ||
-      billingAddress.city.trim() ||
-      billingAddress.state.trim() ||
-      billingAddress.pincode.trim()
+        billingAddress.city.trim() ||
+        billingAddress.state.trim() ||
+        billingAddress.pincode.trim()
         ? billingAddress
         : null;
 
@@ -298,9 +308,9 @@ const TourBooking = () => {
           deboardingPoint: t.deboardingPoint,
           selectedAddon: t.selectedAddon
             ? {
-                name: t.selectedAddon.name,
-                price: Number(t.selectedAddon.amount) || 0,
-              }
+              name: t.selectedAddon.name,
+              price: Number(t.selectedAddon.amount) || 0,
+            }
             : null,
           remarks: t.remarks?.trim() || null,
           packageType: t.packageType,
@@ -333,7 +343,7 @@ const TourBooking = () => {
       console.error(error);
       toast.error(
         error.response?.data?.message ||
-          "Booking failed. Please check traveller details."
+        "Booking failed. Please check traveller details."
       );
     } finally {
       setIsSubmitting(false);
@@ -695,8 +705,8 @@ const TourBooking = () => {
                           traveller.packageType === "main"
                             ? tourInfo
                             : tourInfo.variantPackage?.[
-                                traveller.variantPackageIndex
-                              ];
+                            traveller.variantPackageIndex
+                            ];
                         const selectedBP =
                           selectedPackage?.boardingPoints?.find(
                             (bp) => bp.stationCode === e.target.value
@@ -712,8 +722,8 @@ const TourBooking = () => {
                       {(traveller.packageType === "main"
                         ? tourInfo.boardingPoints
                         : tourInfo.variantPackage?.[
-                            traveller.variantPackageIndex
-                          ]?.boardingPoints || []
+                          traveller.variantPackageIndex
+                        ]?.boardingPoints || []
                       )?.map((bp, i) => (
                         <option key={i} value={bp.stationCode}>
                           {bp.stationCode} - {bp.stationName}
@@ -734,8 +744,8 @@ const TourBooking = () => {
                           traveller.packageType === "main"
                             ? tourInfo
                             : tourInfo.variantPackage?.[
-                                traveller.variantPackageIndex
-                              ];
+                            traveller.variantPackageIndex
+                            ];
                         const selectedDP =
                           selectedPackage?.deboardingPoints?.find(
                             (dp) => dp.stationCode === e.target.value
@@ -751,8 +761,8 @@ const TourBooking = () => {
                       {(traveller.packageType === "main"
                         ? tourInfo.deboardingPoints
                         : tourInfo.variantPackage?.[
-                            traveller.variantPackageIndex
-                          ]?.deboardingPoints || []
+                          traveller.variantPackageIndex
+                        ]?.deboardingPoints || []
                       )?.map((dp, i) => (
                         <option key={i} value={dp.stationCode}>
                           {dp.stationCode} - {dp.stationName}
@@ -812,8 +822,8 @@ const TourBooking = () => {
                           traveller.packageType === "main"
                             ? tourInfo
                             : tourInfo.variantPackage?.[
-                                traveller.variantPackageIndex
-                              ];
+                            traveller.variantPackageIndex
+                            ];
                         const selected = selectedPackage?.addons?.find(
                           (addon) =>
                             addon._id === e.target.value ||
@@ -830,8 +840,8 @@ const TourBooking = () => {
                       {(traveller.packageType === "main"
                         ? tourInfo.addons
                         : tourInfo.variantPackage?.[
-                            traveller.variantPackageIndex
-                          ]?.addons || []
+                          traveller.variantPackageIndex
+                        ]?.addons || []
                       )?.map((addon) => (
                         <option
                           key={addon._id || addon.id}
@@ -907,11 +917,10 @@ const TourBooking = () => {
           <button
             onClick={handleBooking}
             disabled={isSubmitting}
-            className={`w-full py-4 sm:py-5 rounded-2xl text-white font-bold text-lg sm:text-xl transition-all duration-500 transform hover:scale-[1.02] shadow-xl ${
-              isSubmitting
+            className={`w-full py-4 sm:py-5 rounded-2xl text-white font-bold text-lg sm:text-xl transition-all duration-500 transform hover:scale-[1.02] shadow-xl ${isSubmitting
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:from-indigo-600 hover:to-blue-600"
-            } ${isSubmitting ? "" : "hover:shadow-2xl"}`}
+              } ${isSubmitting ? "" : "hover:shadow-2xl"}`}
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-3">
