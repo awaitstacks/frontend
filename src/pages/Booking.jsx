@@ -26,7 +26,7 @@ const TourBooking = () => {
       firstName: "",
       lastName: "",
       age: "",
-      gender: "",
+      gender: "Male", // default for Mr
       sharingType: "double",
       selectedAddon: null,
       boardingPoint: null,
@@ -133,6 +133,22 @@ const TourBooking = () => {
   const handleTravellerChange = (index, field, value) => {
     const updated = [...travellers];
 
+    // Bidirectional sync: Title ↔ Gender
+    if (field === "title") {
+      if (value === "Mr") {
+        updated[index].gender = "Male";
+      } else if (value === "Mrs" || value === "Ms") {
+        updated[index].gender = "Female";
+      }
+    } else if (field === "gender") {
+      if (value === "Male") {
+        updated[index].title = "Mr";
+      } else if (value === "Female") {
+        updated[index].title = "Ms"; // Default to Ms for Female (user can manually change to Mrs)
+      }
+    }
+
+    // Age-based sharing type restrictions (unchanged)
     if (field === "age") {
       const age = Number(value);
       if (age > 85) {
@@ -152,6 +168,7 @@ const TourBooking = () => {
 
     updated[index][field] = value;
 
+    // Reset dependent fields when package changes
     if (field === "packageType" || field === "variantPackageIndex") {
       updated[index].boardingPoint = null;
       updated[index].deboardingPoint = null;
@@ -169,7 +186,7 @@ const TourBooking = () => {
         firstName: "",
         lastName: "",
         age: "",
-        gender: "",
+        gender: "Male", // default for new traveller (Mr)
         sharingType: "",
         selectedAddon: null,
         boardingPoint: null,
@@ -218,7 +235,7 @@ const TourBooking = () => {
     for (let [idx, t] of travellers.entries()) {
       const age = Number(t.age);
 
-      // First Name & Last Name missing check (NEW - as you asked)
+      // First Name & Last Name missing check
       if (!t.firstName?.trim()) {
         toast.error(`Traveller ${idx + 1}: First Name is required (As per Aadhar).`);
         setIsSubmitting(false);
@@ -233,16 +250,14 @@ const TourBooking = () => {
 
       if (isNaN(age) || age < 1) {
         toast.error(
-          `Invalid age for traveller: ${t.firstName || "Unnamed"
-          }. Age must be greater than 0.`
+          `Invalid age for traveller: ${t.firstName || "Unnamed"}. Age must be greater than 0.`
         );
         setIsSubmitting(false);
         return;
       }
       if (age < 6) {
         toast.error(
-          `Age must be at least 6 years for traveller: ${t.firstName || "Unnamed"
-          }.`
+          `Age must be at least 6 years for traveller: ${t.firstName || "Unnamed"}.`
         );
         setIsSubmitting(false);
         return;
@@ -279,8 +294,7 @@ const TourBooking = () => {
       }
       if (t.packageType === "variant" && t.variantPackageIndex === null) {
         toast.error(
-          `Please select a variant package for traveller: ${t.firstName || "Unnamed"
-          }.`
+          `Please select a variant package for traveller: ${t.firstName || "Unnamed"}.`
         );
         setIsSubmitting(false);
         return;
@@ -289,9 +303,9 @@ const TourBooking = () => {
 
     const billingData =
       billingAddress.addressLine1.trim() ||
-        billingAddress.city.trim() ||
-        billingAddress.state.trim() ||
-        billingAddress.pincode.trim()
+      billingAddress.city.trim() ||
+      billingAddress.state.trim() ||
+      billingAddress.pincode.trim()
         ? billingAddress
         : null;
 
@@ -308,9 +322,9 @@ const TourBooking = () => {
           deboardingPoint: t.deboardingPoint,
           selectedAddon: t.selectedAddon
             ? {
-              name: t.selectedAddon.name,
-              price: Number(t.selectedAddon.amount) || 0,
-            }
+                name: t.selectedAddon.name,
+                price: Number(t.selectedAddon.amount) || 0,
+              }
             : null,
           remarks: t.remarks?.trim() || null,
           packageType: t.packageType,
@@ -343,7 +357,7 @@ const TourBooking = () => {
       console.error(error);
       toast.error(
         error.response?.data?.message ||
-        "Booking failed. Please check traveller details."
+          "Booking failed. Please check traveller details."
       );
     } finally {
       setIsSubmitting(false);
@@ -441,7 +455,7 @@ const TourBooking = () => {
           )}
         </div>
 
-        {/* Important Notice Alert - Same as My Trolly Page */}
+        {/* Important Notice Alert */}
         <div className="mb-8 px-6 py-5 bg-amber-50 border border-amber-300 rounded-2xl text-amber-900 shadow-md">
           <p className="text-center font-medium leading-relaxed">
             <span className="font-semibold">Important Notice:</span> To avoid higher gateway charges, we are currently processing all bookings in offline mode only.
@@ -462,7 +476,6 @@ const TourBooking = () => {
               value={bookingType}
               onChange={(e) => setBookingType(e.target.value)}
             >
-              {/* <option value="online">Online Payment</option>  */}
               <option value="offline">Offline Booking</option>
             </select>
           </div>
@@ -501,7 +514,7 @@ const TourBooking = () => {
 
           {/* Billing Address */}
           <div className="bg-white/70 backdrop-blur rounded-2xl p-4 sm:p-6 shadow-lg transition-all hover:shadow-xl">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-5">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 sm:mb-6">
               Billing Address (Optional)
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -705,8 +718,8 @@ const TourBooking = () => {
                           traveller.packageType === "main"
                             ? tourInfo
                             : tourInfo.variantPackage?.[
-                            traveller.variantPackageIndex
-                            ];
+                                traveller.variantPackageIndex
+                              ];
                         const selectedBP =
                           selectedPackage?.boardingPoints?.find(
                             (bp) => bp.stationCode === e.target.value
@@ -722,8 +735,8 @@ const TourBooking = () => {
                       {(traveller.packageType === "main"
                         ? tourInfo.boardingPoints
                         : tourInfo.variantPackage?.[
-                          traveller.variantPackageIndex
-                        ]?.boardingPoints || []
+                            traveller.variantPackageIndex
+                          ]?.boardingPoints || []
                       )?.map((bp, i) => (
                         <option key={i} value={bp.stationCode}>
                           {bp.stationCode} - {bp.stationName}
@@ -744,8 +757,8 @@ const TourBooking = () => {
                           traveller.packageType === "main"
                             ? tourInfo
                             : tourInfo.variantPackage?.[
-                            traveller.variantPackageIndex
-                            ];
+                                traveller.variantPackageIndex
+                              ];
                         const selectedDP =
                           selectedPackage?.deboardingPoints?.find(
                             (dp) => dp.stationCode === e.target.value
@@ -761,8 +774,8 @@ const TourBooking = () => {
                       {(traveller.packageType === "main"
                         ? tourInfo.deboardingPoints
                         : tourInfo.variantPackage?.[
-                          traveller.variantPackageIndex
-                        ]?.deboardingPoints || []
+                            traveller.variantPackageIndex
+                          ]?.deboardingPoints || []
                       )?.map((dp, i) => (
                         <option key={i} value={dp.stationCode}>
                           {dp.stationCode} - {dp.stationName}
@@ -822,8 +835,8 @@ const TourBooking = () => {
                           traveller.packageType === "main"
                             ? tourInfo
                             : tourInfo.variantPackage?.[
-                            traveller.variantPackageIndex
-                            ];
+                                traveller.variantPackageIndex
+                              ];
                         const selected = selectedPackage?.addons?.find(
                           (addon) =>
                             addon._id === e.target.value ||
@@ -840,8 +853,8 @@ const TourBooking = () => {
                       {(traveller.packageType === "main"
                         ? tourInfo.addons
                         : tourInfo.variantPackage?.[
-                          traveller.variantPackageIndex
-                        ]?.addons || []
+                            traveller.variantPackageIndex
+                          ]?.addons || []
                       )?.map((addon) => (
                         <option
                           key={addon._id || addon.id}
