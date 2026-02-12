@@ -458,7 +458,7 @@ const TourBooking = () => {
         {/* Important Notice Alert */}
         <div className="mb-8 px-6 py-5 bg-amber-50 border border-amber-300 rounded-2xl text-amber-900 shadow-md">
           <p className="text-center font-medium leading-relaxed">
-            <span className="font-semibold">Important Notice:</span> To avoid higher gateway charges, we are currently processing all bookings in offline mode only.
+            <span className="font-semibold">Important Notice:</span> To avoid higher payment gateway charges, we are currently processing all bookings in offline mode only.
             <br />
             Please proceed with{" "}
             <span className="font-semibold">Offline Booking</span>. We will immediately share the payment details via WhatsApp once you confirm. Kindly complete the payment and inform us for instant booking confirmation. Thank you for your understanding.
