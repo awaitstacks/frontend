@@ -23,7 +23,7 @@ const TourApp = () => {
       <ToastContainer />
 
       {/* Subtle floating watermark icons – visible on all pages */}
-      <div className="fixed inset-0 pointer-events-none z-0 ">
+      <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-1/4 left-8 text-8xl text-blue-300 animate-float-slow">
           📍
         </div>
@@ -43,7 +43,7 @@ const TourApp = () => {
 
       {/* Fixed Glass Navbar */}
       <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="sticky top-0 z-50 bg-white ">
+        <div className="sticky top-0 z-50 bg-white">
           <div className="mx-4 sm:mx-[10%]">
             <TourNavbar />
           </div>
@@ -69,19 +69,18 @@ const TourApp = () => {
         </Routes>
       </main>
 
-      {/* Footer - Clean glass effect on top of background */}
-      <footer className="relative z-20 mx-6 sm:mx-[11%] mt-12 pt-8 ">
+      {/* Footer */}
+      <footer className="relative z-20 mx-6 sm:mx-[11%] mt-12 pt-8">
         <Footer />
       </footer>
 
-      {/* Soft fade-in at bottom for elegant separation */}
+      {/* Soft fade-in at bottom */}
       <div className="h-8 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
 
-      {/* Fixed: Changed <style jsx global> → <style> */}
+      {/* Animations */}
       <style>{`
         @keyframes float-slow {
-          0%,
-          100% {
+          0%, 100% {
             transform: translateY(0) rotate(0deg);
           }
           50% {
@@ -93,18 +92,10 @@ const TourApp = () => {
           animation: float-slow 25s ease-in-out infinite;
         }
 
-        .delay-1000 {
-          animation-delay: 1s;
-        }
-        .delay-2000 {
-          animation-delay: 2s;
-        }
-        .delay-3000 {
-          animation-delay: 3s;
-        }
-        .delay-4000 {
-          animation-delay: 4s;
-        }
+        .delay-1000 { animation-delay: 1s; }
+        .delay-2000 { animation-delay: 2s; }
+        .delay-3000 { animation-delay: 3s; }
+        .delay-4000 { animation-delay: 4s; }
       `}</style>
     </div>
   );

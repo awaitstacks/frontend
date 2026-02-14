@@ -19,7 +19,6 @@ const MyBookings = () => {
   const [visibleCount, setVisibleCount] = useState(10);
   const navigate = useNavigate();
 
-  // Fetch user bookings
   const getUserBookings = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/user/my-trolly`, {
@@ -34,19 +33,17 @@ const MyBookings = () => {
     }
   };
 
-  // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(10);
   }, [searchTerm, statusFilter]);
 
-  // Confirm cancellation
   const confirmCancellation = async () => {
     const { bookingId, travellerId } = cancelPopup;
     try {
       const { data } = await axios.post(
         `${backendUrl}/api/user/cancel-traveller`,
         { bookingId, travellerId },
-        { headers: { token } }
+        { headers: { token } },
       );
       if (data.success) {
         toast.success(data.message);
@@ -62,7 +59,6 @@ const MyBookings = () => {
     }
   };
 
-  // Razorpay payment init
   const initPay = (order, bookingId, paymentType) => {
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -76,7 +72,7 @@ const MyBookings = () => {
           const { data } = await axios.post(
             `${backendUrl}/api/user/verifyRazorpay`,
             { ...response, bookingId, paymentType },
-            { headers: { token } }
+            { headers: { token } },
           );
           if (data.success) {
             toast.success(data.message);
@@ -100,7 +96,7 @@ const MyBookings = () => {
       const { data } = await axios.post(
         `${backendUrl}/api/user/payment-razorpay`,
         { bookingId, paymentType },
-        { headers: { token } }
+        { headers: { token } },
       );
       if (data.success) {
         initPay(data.order, bookingId, paymentType);
@@ -122,22 +118,15 @@ const MyBookings = () => {
     return d.toLocaleDateString("en-GB") + " " + d.toLocaleTimeString();
   };
 
-  // Check if all travellers are cancelled
   const allTravellersCancelled = (item) => {
     if (!item.travellers || item.travellers.length === 0) return false;
-
     return item.travellers.every((t) => {
       const byT = t?.cancelled?.byTraveller;
       const byA = t?.cancelled?.byAdmin;
-
-      if (byA) return true;
-      if (byT && byA) return true;
-
-      return false;
+      return byA || (byT && byA);
     });
   };
 
-  // Decide Pay Balance button
   const canShowBalanceButton = (item) => {
     if (item.bookingType !== "online") return false;
     if (!item.payment?.advance?.paid) return false;
@@ -146,12 +135,11 @@ const MyBookings = () => {
 
     const travellers = item.travellers || [];
     const hasUserOnlyCancel = travellers.some(
-      (t) => t?.cancelled?.byTraveller && !t?.cancelled?.byAdmin
+      (t) => t?.cancelled?.byTraveller && !t?.cancelled?.byAdmin,
     );
     return !hasUserOnlyCancel;
   };
 
-  // Render booking status
   const renderStatus = (item) => {
     if (item.isBookingCompleted) return "Booking Completed";
 
@@ -161,7 +149,7 @@ const MyBookings = () => {
     if (item.cancelled?.byAdmin) return "Booking rejected by admin";
 
     const hasPendingCancellation = item.travellers?.some(
-      (t) => t?.cancelled?.byTraveller && !t?.cancelled?.byAdmin
+      (t) => t?.cancelled?.byTraveller && !t?.cancelled?.byAdmin,
     );
     if (hasPendingCancellation) return "Cancellation Requested";
 
@@ -194,7 +182,6 @@ const MyBookings = () => {
     return "Pending";
   };
 
-  // Filter bookings
   const filteredBookings = bookings.filter((item) => {
     const matchesTitle = item.tourData.title
       .toLowerCase()
@@ -217,7 +204,6 @@ const MyBookings = () => {
     return itemStatus === statusFilter;
   });
 
-  // Displayed bookings with pagination
   const displayedBookings = filteredBookings.slice(0, visibleCount);
 
   const handleShowMore = () => {
@@ -225,7 +211,8 @@ const MyBookings = () => {
   };
 
   return (
-      <div className="
+    <div
+      className="
         w-full 
         max-w-[98%] xs:max-w-[96%] sm:max-w-[98%] md:max-w-[96vw] 
         lg:max-w-[94vw] xl:max-w-[92vw] 2xl:max-w-[90vw]
@@ -234,7 +221,8 @@ const MyBookings = () => {
         shadow-2xl md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.12)]
         overflow-hidden
         p-8 xs:p-10 sm:p-12 md:p-16 lg:p-20 xl:p-24
-      ">
+      "
+    >
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center">
           My Trolly
@@ -276,7 +264,7 @@ const MyBookings = () => {
                   className="flex flex-col md:flex-row gap-6 cursor-pointer"
                   onClick={() =>
                     setExpandedBooking(
-                      expandedBooking === item._id ? null : item._id
+                      expandedBooking === item._id ? null : item._id,
                     )
                   }
                 >
@@ -378,7 +366,6 @@ const MyBookings = () => {
                   </div>
                 </div>
 
-                {/* Expanded Traveller Details */}
                 {expandedBooking === item._id && (
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -406,7 +393,6 @@ const MyBookings = () => {
                             key={idx}
                             className="bg-indigo-50/50 rounded-xl p-5 transition-all duration-300 hover:bg-indigo-100/50 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
                           >
-                            {/* Traveller Info */}
                             <div className="flex-1">
                               <p className="font-medium text-gray-800">
                                 Name: {traveller.title} {traveller.firstName}{" "}
@@ -420,9 +406,7 @@ const MyBookings = () => {
                                 Package:{" "}
                                 {traveller.packageType === "main"
                                   ? "Main Package"
-                                  : `Variant ${
-                                      traveller.variantPackageIndex + 1
-                                    }`}
+                                  : `Variant ${traveller.variantPackageIndex + 1}`}
                               </p>
                               <p className="text-gray-600">
                                 Sharing: {traveller.sharingType}
@@ -454,9 +438,9 @@ const MyBookings = () => {
                                     travellerBadge === "Cancelled"
                                       ? "bg-red-100 text-red-700"
                                       : travellerBadge ===
-                                        "Cancellation Requested"
-                                      ? "bg-orange-100 text-orange-700"
-                                      : "bg-purple-100 text-purple-700"
+                                          "Cancellation Requested"
+                                        ? "bg-orange-100 text-orange-700"
+                                        : "bg-purple-100 text-purple-700"
                                   }`}
                                 >
                                   {travellerBadge}
@@ -464,7 +448,6 @@ const MyBookings = () => {
                               )}
                             </div>
 
-                            {/* Cancel Button - Right aligned on md+ screens */}
                             {canCancel && (
                               <div className="md:self-center">
                                 <button
