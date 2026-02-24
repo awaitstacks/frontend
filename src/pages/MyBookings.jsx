@@ -4,6 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { TourAppContext } from "../context/TourAppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import {
+  ChevronDown,
+  ChevronUp,
+  IndianRupee,
+  Users,
+  Copy, // ← Added this import (fixes the error)
+} from "lucide-react";
 
 const MyBookings = () => {
   const { backendUrl, token, currencySymbol } = useContext(TourAppContext);
@@ -11,7 +18,7 @@ const MyBookings = () => {
   const [expandedBooking, setExpandedBooking] = useState(null);
   const [cancelPopup, setCancelPopup] = useState({
     show: false,
-    bookingId: null,
+    tnr: null,
     travellerId: null,
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,11 +45,11 @@ const MyBookings = () => {
   }, [searchTerm, statusFilter]);
 
   const confirmCancellation = async () => {
-    const { bookingId, travellerId } = cancelPopup;
+    const { tnr, travellerId } = cancelPopup;
     try {
       const { data } = await axios.post(
         `${backendUrl}/api/user/cancel-traveller`,
-        { bookingId, travellerId },
+        { tnr, travellerId },
         { headers: { token } },
       );
       if (data.success) {
@@ -53,13 +60,17 @@ const MyBookings = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error(error.message || "Failed to cancel booking");
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to cancel traveller",
+      );
     } finally {
-      setCancelPopup({ show: false, bookingId: null, travellerId: null });
+      setCancelPopup({ show: false, tnr: null, travellerId: null });
     }
   };
 
-  const initPay = (order, bookingId, paymentType) => {
+  const initPay = (order, tnr, paymentType) => {
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: order.amount,
@@ -71,7 +82,7 @@ const MyBookings = () => {
         try {
           const { data } = await axios.post(
             `${backendUrl}/api/user/verifyRazorpay`,
-            { ...response, bookingId, paymentType },
+            { ...response, tnr, paymentType },
             { headers: { token } },
           );
           if (data.success) {
@@ -91,15 +102,15 @@ const MyBookings = () => {
     new window.Razorpay(options).open();
   };
 
-  const bookingRazorpay = async (bookingId, paymentType) => {
+  const bookingRazorpay = async (tnr, paymentType) => {
     try {
       const { data } = await axios.post(
         `${backendUrl}/api/user/payment-razorpay`,
-        { bookingId, paymentType },
+        { tnr, paymentType },
         { headers: { token } },
       );
       if (data.success) {
-        initPay(data.order, bookingId, paymentType);
+        initPay(data.order, tnr, paymentType);
       } else {
         toast.error(data.message);
       }
@@ -257,14 +268,14 @@ const MyBookings = () => {
           ) : (
             displayedBookings.map((item) => (
               <div
-                key={item._id}
+                key={item.tnr} // ← Use tnr as key (safe & unique)
                 className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl"
               >
                 <div
                   className="flex flex-col md:flex-row gap-6 cursor-pointer"
                   onClick={() =>
                     setExpandedBooking(
-                      expandedBooking === item._id ? null : item._id,
+                      expandedBooking === item.tnr ? null : item.tnr,
                     )
                   }
                 >
@@ -274,9 +285,33 @@ const MyBookings = () => {
                     className="w-full md:w-48 h-32 object-cover rounded-xl"
                   />
                   <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                      {item.tourData.title}
-                    </h2>
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-2xl font-bold text-gray-800">
+                        {item.tourData.title}
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl font-semibold text-gray-800">
+                          TNR:{" "}
+                          <code className="bg-gray-100 px-2 py-1 rounded font-mono text-lg">
+                            {item.tnr || "N/A"}
+                          </code>
+                        </span>
+                        {item.tnr && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigator.clipboard.writeText(item.tnr);
+                              toast.success("TNR copied!");
+                            }}
+                            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition"
+                            title="Copy TNR"
+                          >
+                            <Copy size={20} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
                     <p className="text-gray-600 mb-1">
                       Duration: {item.tourData.duration?.days} Days /{" "}
                       {item.tourData.duration?.nights} Nights
@@ -288,6 +323,7 @@ const MyBookings = () => {
                       Status: {renderStatus(item)}
                     </p>
                   </div>
+
                   <div className="flex flex-col gap-2 justify-center md:justify-end">
                     {item.bookingType === "online" && (
                       <>
@@ -301,7 +337,7 @@ const MyBookings = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  bookingRazorpay(item._id, "advance");
+                                  bookingRazorpay(item.tnr, "advance");
                                 }}
                                 className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-xl font-medium hover:bg-indigo-200 transition-all"
                               >
@@ -312,7 +348,7 @@ const MyBookings = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  bookingRazorpay(item._id, "balance");
+                                  bookingRazorpay(item.tnr, "balance");
                                 }}
                                 className="px-4 py-2 bg-green-100 text-green-700 rounded-xl font-medium hover:bg-green-200 transition-all"
                               >
@@ -366,7 +402,7 @@ const MyBookings = () => {
                   </div>
                 </div>
 
-                {expandedBooking === item._id && (
+                {expandedBooking === item.tnr && (
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">
                       Traveller Details
@@ -454,7 +490,7 @@ const MyBookings = () => {
                                   onClick={() =>
                                     setCancelPopup({
                                       show: true,
-                                      bookingId: item._id,
+                                      tnr: item.tnr,
                                       travellerId: traveller._id,
                                     })
                                   }
@@ -501,7 +537,7 @@ const MyBookings = () => {
                   onClick={() =>
                     setCancelPopup({
                       show: false,
-                      bookingId: null,
+                      tnr: null,
                       travellerId: null,
                     })
                   }
