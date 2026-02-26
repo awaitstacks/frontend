@@ -488,7 +488,7 @@ const TourBooking = () => {
               onChange={(e) => setBookingType(e.target.value)}
             >
               <option value="offline">Offline Booking</option>
-              <option value="online">Online Booking</option>
+              {/* <option value="online">Online Booking</option> */}
             </select>
           </div>
 
