@@ -237,27 +237,31 @@ const TourBooking = () => {
 
       // First Name & Last Name missing check
       if (!t.firstName?.trim()) {
-        toast.error(`Traveller ${idx + 1}: First Name is required (As per Aadhar).`);
+        toast.error(
+          `Traveller ${idx + 1}: First Name is required (As per Aadhar).`,
+        );
         setIsSubmitting(false);
         return;
       }
 
       if (!t.lastName?.trim()) {
-        toast.error(`Traveller ${idx + 1}: Last Name is required (As per Aadhar).`);
+        toast.error(
+          `Traveller ${idx + 1}: Last Name is required (As per Aadhar).`,
+        );
         setIsSubmitting(false);
         return;
       }
 
       if (isNaN(age) || age < 1) {
         toast.error(
-          `Invalid age for traveller: ${t.firstName || "Unnamed"}. Age must be greater than 0.`
+          `Invalid age for traveller: ${t.firstName || "Unnamed"}. Age must be greater than 0.`,
         );
         setIsSubmitting(false);
         return;
       }
       if (age < 6) {
         toast.error(
-          `Age must be at least 6 years for traveller: ${t.firstName || "Unnamed"}.`
+          `Age must be at least 6 years for traveller: ${t.firstName || "Unnamed"}.`,
         );
         setIsSubmitting(false);
         return;
@@ -294,7 +298,7 @@ const TourBooking = () => {
       }
       if (t.packageType === "variant" && t.variantPackageIndex === null) {
         toast.error(
-          `Please select a variant package for traveller: ${t.firstName || "Unnamed"}.`
+          `Please select a variant package for traveller: ${t.firstName || "Unnamed"}.`,
         );
         setIsSubmitting(false);
         return;
@@ -340,14 +344,14 @@ const TourBooking = () => {
       const { data } = await axios.post(
         `${backendUrl}/api/user/addtotrolly`,
         payload,
-        { headers: { token } }
+        { headers: { token } },
       );
 
       if (data.success) {
         toast.success(
           bookingType === "offline"
             ? "Offline booking added to My Trolly! Awaiting confirmation."
-            : "Booking added to My Trolly! Complete payment from My Trolly."
+            : "Booking added to My Trolly! Complete payment from My Trolly.",
         );
         navigate("/my-trolly");
       } else {
@@ -357,7 +361,7 @@ const TourBooking = () => {
       console.error(error);
       toast.error(
         error.response?.data?.message ||
-          "Booking failed. Please check traveller details."
+          "Booking failed. Please check traveller details.",
       );
     } finally {
       setIsSubmitting(false);
@@ -396,7 +400,8 @@ const TourBooking = () => {
   };
 
   return (
-    <div className="w-full 
+    <div
+      className="w-full 
         max-w-[98%] xs:max-w-[96%] sm:max-w-[98%] md:max-w-[96vw] 
         lg:max-w-[94vw] xl:max-w-[92vw] 2xl:max-w-[90vw]
         rounded-3xl sm:rounded-[2.5rem] md:rounded-[3rem] lg:rounded-[3.5rem] xl:rounded-[4rem]
@@ -404,7 +409,8 @@ const TourBooking = () => {
         shadow-2xl md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.12)]
         overflow-hidden
         p-8 xs:p-10 sm:p-12 md:p-16 lg:p-20 xl:p-24
-      ">
+      "
+    >
       <div className="max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto">
         {/* Tour Header */}
         <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-lg p-6 sm:p-8 md:p-10 mb-6 sm:mb-8 md:mb-10 text-center transition-all duration-500 hover:shadow-xl">
@@ -458,10 +464,15 @@ const TourBooking = () => {
         {/* Important Notice Alert */}
         <div className="mb-8 px-6 py-5 bg-amber-50 border border-amber-300 rounded-2xl text-amber-900 shadow-md">
           <p className="text-center font-medium leading-relaxed">
-            <span className="font-semibold">Important Notice:</span> To avoid higher payment gateway charges, we are currently processing all bookings in offline mode only.
+            <span className="font-semibold">Important Notice:</span> To avoid
+            higher payment gateway charges, we are currently processing all
+            bookings in offline mode only.
             <br />
             Please proceed with{" "}
-            <span className="font-semibold">Offline Booking</span>. We will immediately share the payment details via WhatsApp once you confirm. Kindly complete the payment and inform us for instant booking confirmation. Thank you for your understanding.
+            <span className="font-semibold">Offline Booking</span>. We will
+            immediately share the payment details via WhatsApp once you confirm.
+            Kindly complete the payment and inform us for instant booking
+            confirmation. Thank you for your understanding.
           </p>
         </div>
 
@@ -477,6 +488,7 @@ const TourBooking = () => {
               onChange={(e) => setBookingType(e.target.value)}
             >
               <option value="offline">Offline Booking</option>
+              <option value="online">Online Booking</option>
             </select>
           </div>
 
@@ -632,14 +644,14 @@ const TourBooking = () => {
                         handleTravellerChange(
                           index,
                           "variantPackageIndex",
-                          null
+                          null,
                         );
                       } else {
                         handleTravellerChange(index, "packageType", "variant");
                         handleTravellerChange(
                           index,
                           "variantPackageIndex",
-                          Number(value)
+                          Number(value),
                         );
                       }
                     }}
@@ -722,12 +734,12 @@ const TourBooking = () => {
                               ];
                         const selectedBP =
                           selectedPackage?.boardingPoints?.find(
-                            (bp) => bp.stationCode === e.target.value
+                            (bp) => bp.stationCode === e.target.value,
                           );
                         handleTravellerChange(
                           index,
                           "boardingPoint",
-                          selectedBP || null
+                          selectedBP || null,
                         );
                       }}
                     >
@@ -761,12 +773,12 @@ const TourBooking = () => {
                               ];
                         const selectedDP =
                           selectedPackage?.deboardingPoints?.find(
-                            (dp) => dp.stationCode === e.target.value
+                            (dp) => dp.stationCode === e.target.value,
                           );
                         handleTravellerChange(
                           index,
                           "deboardingPoint",
-                          selectedDP || null
+                          selectedDP || null,
                         );
                       }}
                     >
@@ -796,7 +808,7 @@ const TourBooking = () => {
                         handleTravellerChange(
                           index,
                           "sharingType",
-                          e.target.value
+                          e.target.value,
                         )
                       }
                       className="w-full px-4 sm:px-5 py-3 sm:py-4 rounded-xl border border-gray-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all duration-300"
@@ -840,12 +852,12 @@ const TourBooking = () => {
                         const selected = selectedPackage?.addons?.find(
                           (addon) =>
                             addon._id === e.target.value ||
-                            addon.id === e.target.value
+                            addon.id === e.target.value,
                         );
                         handleTravellerChange(
                           index,
                           "selectedAddon",
-                          selected || null
+                          selected || null,
                         );
                       }}
                     >
@@ -930,10 +942,11 @@ const TourBooking = () => {
           <button
             onClick={handleBooking}
             disabled={isSubmitting}
-            className={`w-full py-4 sm:py-5 rounded-2xl text-white font-bold text-lg sm:text-xl transition-all duration-500 transform hover:scale-[1.02] shadow-xl ${isSubmitting
+            className={`w-full py-4 sm:py-5 rounded-2xl text-white font-bold text-lg sm:text-xl transition-all duration-500 transform hover:scale-[1.02] shadow-xl ${
+              isSubmitting
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:from-indigo-600 hover:to-blue-600"
-              } ${isSubmitting ? "" : "hover:shadow-2xl"}`}
+            } ${isSubmitting ? "" : "hover:shadow-2xl"}`}
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-3">
