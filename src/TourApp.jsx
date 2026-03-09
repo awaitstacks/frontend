@@ -15,6 +15,8 @@ import TourNavbar from "./components/TourNavbar.jsx";
 import TourBooking from "./pages/Booking.jsx";
 import MyBookings from "./pages/MyBookings.jsx";
 import TourDetails from "./pages/TourDetails.jsx";
+import TermsAgreementPage from "./pages/TermsAgreementPage.jsx";
+import ThankyouPage from "./pages/ThankyouPage.jsx";
 
 const TourApp = () => {
   return (
@@ -66,6 +68,9 @@ const TourApp = () => {
           <Route path="/my-profile" element={<MyProfile />} />
           <Route path="/booking/:tourId" element={<TourBooking />} />
           <Route path="/my-trolly" element={<MyBookings />} />
+          <Route path="/agree/:tnr" element={<TermsAgreementPage />} />
+
+          <Route path="/thank-you" element={<ThankyouPage />} />
         </Routes>
       </main>
 
