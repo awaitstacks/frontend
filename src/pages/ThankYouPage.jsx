@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, ArrowLeft, Home } from "lucide-react";
 
-const ThankyouPage = () => {
+const ThankYouPage = () => {
   const navigate = useNavigate();
 
   return (
@@ -35,4 +35,4 @@ const ThankyouPage = () => {
   );
 };
 
-export default ThankyouPage;
+export default ThankYouPage;
