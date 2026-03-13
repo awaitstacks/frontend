@@ -18,6 +18,10 @@ import TourDetails from "./pages/TourDetails.jsx";
 import TermsAgreementPage from "./pages/TermsAgreementPage.jsx";
 import ThankYouPage from "./pages/ThankYouPage.jsx";
 
+import Tnr from "./pages/Tnr.jsx";
+import SeatAllocation from "./pages/SeatAllocation.jsx";
+import SeatThankYouPage from "./pages/SeatThankYouPage.jsx";
+
 const TourApp = () => {
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-b from-white via-sky-50 to-sky-100">
@@ -71,6 +75,9 @@ const TourApp = () => {
           <Route path="/agree/:tnr" element={<TermsAgreementPage />} />
 
           <Route path="/thank-you" element={<ThankYouPage />} />
+          <Route path="/seat-thank-you" element={<SeatThankYouPage />} />
+          <Route path="/tnr" element={<Tnr />} />
+          <Route path="/seat-allocation/:tnr" element={<SeatAllocation />} />
         </Routes>
       </main>
 

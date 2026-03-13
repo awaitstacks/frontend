@@ -94,21 +94,35 @@ const TourDetails = () => {
     setBookingLoading(true);
 
     // ────────────────────────────────────────────────
-    //   LOGIN CHECK → REDIRECT TO BOOKING OR SIGNUP
+    //   LOGIN CHECK → REDIRECT TO BOOKING OR LOGIN
     // ────────────────────────────────────────────────
     if (!token || !userData?._id) {
-      // Not logged in
-      toast.info("Please create an account or login to continue booking");
-      navigate("/login"); // ← change this if your route is different
+      // Not logged in → redirect to login
+      toast.info("Please login or create an account to continue booking");
+
+      navigate("/login");
+
+      // Scroll to top after navigation (small delay ensures route changes first)
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "smooth", // smooth scroll (feels natural)
+        });
+      }, 100); // 100ms is usually enough
     } else {
-      // Already logged in → proceed to booking
+      // Already logged in → go to booking
       navigate(`/booking/${tour._id}`);
+
+      // Optional: scroll here too if needed
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
     }
 
     setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
       setBookingLoading(false);
-    }, 100);
+    }, 300);
   };
 
   if (loading)

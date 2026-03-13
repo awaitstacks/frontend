@@ -87,6 +87,14 @@ const TourNavbar = () => {
             <span>CONTACT</span>
             <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
           </NavLink>
+          <NavLink
+            to="/tnr"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="relative group py-2"
+          >
+            <span>VIEW TNR</span>
+            <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
+          </NavLink>
         </ul>
 
         <div className="flex items-center gap-6">
@@ -208,6 +216,12 @@ const TourNavbar = () => {
               className="px-8 py-4 rounded-full hover:bg-blue-50 transition w-full text-center cursor-pointer"
             >
               CONTACT
+            </p>
+            <p
+              onClick={() => handleNavigation("/tnr")}
+              className="px-8 py-4 rounded-full hover:bg-blue-50 transition w-full text-center cursor-pointer"
+            >
+              VIEW TNR
             </p>
 
             {token && userData && (

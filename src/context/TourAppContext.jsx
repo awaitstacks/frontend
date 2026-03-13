@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-refresh/only-export-components */
 // context/TourAppContext.jsx
 
 import { createContext, useEffect, useState } from "react";
@@ -32,7 +35,6 @@ const TourAppContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error);
       toast.error(error.message || "Failed to load tours");
     }
   };
@@ -46,7 +48,6 @@ const TourAppContextProvider = (props) => {
         toast.error(data.message || "Failed to load tour years");
       }
     } catch (error) {
-      console.error("Error fetching tour years:", error);
       toast.error("Could not load years");
     }
   };
@@ -67,8 +68,6 @@ const TourAppContextProvider = (props) => {
         return null;
       }
     } catch (error) {
-      console.error(`Error fetching tours for year ${year}:`, error);
-      toast.error("Server error while loading tours");
       return null;
     }
   };
@@ -89,7 +88,6 @@ const TourAppContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error);
       toast.error(error.message);
     }
   };
@@ -125,7 +123,7 @@ const TourAppContextProvider = (props) => {
         error.response?.data?.message ||
         error.message ||
         "Failed to fetch current terms";
-      console.error("getCurrentTourTerms error:", error);
+
       toast.error(msg);
       return { success: false, message: msg };
     }
@@ -171,7 +169,7 @@ const TourAppContextProvider = (props) => {
         error.response?.data?.message ||
         error.message ||
         "Failed to submit terms agreement";
-      console.error("submitBookingTermsAgreement error:", error);
+
       toast.error(msg);
       return { success: false, message: msg };
     }
@@ -203,7 +201,93 @@ const TourAppContextProvider = (props) => {
       return { success: false, message: msg };
     }
   };
+  // Add this new function inside TourAppContextProvider
+  const getSeatAllocationByTNR = async (tnr) => {
+    if (!tnr || tnr.length !== 6 || !/^[A-Z0-9]{6}$/i.test(tnr)) {
+      toast.error("Please enter a valid 6-digit TNR");
+      return { success: false, message: "Invalid TNR format" };
+    }
 
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/user/seat-allocation/tnr/${tnr.toUpperCase()}`,
+      );
+      if (data.success) {
+        return { success: true, data: data };
+      } else {
+        toast.error(data.message || "Failed to fetch seat allocation");
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      const msg =
+        error.response?.data?.message ||
+        error.message ||
+        "Server error while fetching seat allocation";
+
+      toast.error(msg);
+      return { success: false, message: msg };
+    }
+  };
+  const getBookingDetailsByTNR = async (tnr) => {
+    if (!tnr || tnr.length !== 6 || !/^[A-Z0-9]{6}$/i.test(tnr)) {
+      toast.error("Please enter a valid 6-digit TNR");
+      return { success: false, message: "Invalid TNR format" };
+    }
+
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/user/tnr/${tnr.toUpperCase()}`, // ← change to /api/users
+      );
+
+      if (data.success) {
+        return { success: true, booking: data.booking };
+      } else {
+        toast.error(data.message || "Booking not found");
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      const msg =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch booking details";
+
+      toast.error(msg);
+      return { success: false, message: msg };
+    }
+  };
+  // ────────────────────────────────────────────────
+  // Seat Confirmation (public addon-style)
+  // ────────────────────────────────────────────────
+
+  const confirmSeatSelection = async (tnr, selections) => {
+    if (!tnr || tnr.length !== 6 || !/^[A-Z0-9]{6}$/i.test(tnr)) {
+      return { success: false, message: "Invalid TNR format" };
+    }
+
+    if (!selections || Object.keys(selections).length === 0) {
+      return { success: false, message: "No selections provided" };
+    }
+
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/user/${tnr.toUpperCase()}/confirm-seats`,
+        { selections },
+      );
+
+      if (data.success) {
+        return { success: true, data: data.data };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      const msg =
+        error.response?.data?.message ||
+        error.message ||
+        "Error confirming seats";
+      toast.error(msg);
+      return { success: false, message: msg };
+    }
+  };
   // ────────────────────────────────────────────────
   //                   Context Value
   // ────────────────────────────────────────────────
@@ -230,8 +314,10 @@ const TourAppContextProvider = (props) => {
     getCurrentTourTerms,
     submitBookingTermsAgreement,
     getBookingSummary,
-
+    getSeatAllocationByTNR,
+    getBookingDetailsByTNR,
     backendUrl,
+    confirmSeatSelection,
   };
 
   // ────────────────────────────────────────────────
