@@ -122,20 +122,9 @@ const SeatAllocation = () => {
     return traveller?.seatLocked === true && traveller?.seatNumber;
   };
 
-  const getLockedSeatDisplay = (traveller) => {
-    const seat = traveller?.seatNumber || "—";
-    const vehicleName = getVehicleNameForSeat(seat);
-    return vehicleName ? `${seat} - ${vehicleName}` : seat;
-  };
-
-  const getSelectedSeatDisplay = (sel) => {
-    if (!sel?.seatLabel) return "—";
-    const vehicleName = getVehicleNameForSeat(sel.seatLabel);
-    return vehicleName ? `${sel.seatLabel} - ${vehicleName}` : sel.seatLabel;
-  };
-
+  // Only used for already locked seats (pre-selected before this page)
   const getVehicleNameForSeat = (seatLabel) => {
-    if (!seatData?.vehicles) return "";
+    if (!seatData?.vehicles || !seatLabel) return "Unknown Vehicle";
     for (const vehicle of seatData.vehicles) {
       if (
         vehicle.leaderRow?.includes(seatLabel) ||
@@ -144,7 +133,14 @@ const SeatAllocation = () => {
         return vehicle.vehicleName || "Vehicle";
       }
     }
-    return "";
+    return "Unknown Vehicle";
+  };
+
+  const getLockedSeatDisplay = (traveller) => {
+    const seat = traveller?.seatNumber || "—";
+    // For locked seats → prefer stored vehicleName if exists (future-proof)
+    const vehicleName = traveller?.vehicleName || getVehicleNameForSeat(seat);
+    return vehicleName ? `${seat} - ${vehicleName}` : seat;
   };
 
   const isTravellerSelectable = (traveller) => {
@@ -165,18 +161,13 @@ const SeatAllocation = () => {
     ) {
       return "";
     }
-
-    if (side === "left") {
-      return index === 0 ? "W" : "A";
-    }
+    if (side === "left") return index === 0 ? "W" : "A";
     return index === arrLen - 1 ? "W" : index === 0 ? "A" : "M";
   };
 
   const handleSeatClick = (vehicleId, vehicleName, seatLabel) => {
     const activeTraveller = booking?.travellers?.[activePassengerIdx];
-    if (!activeTraveller || hasLockedSeat(activeTraveller)) {
-      return;
-    }
+    if (!activeTraveller || hasLockedSeat(activeTraveller)) return;
 
     const existingEntry = Object.entries(selections).find(
       ([idx, sel]) =>
@@ -227,9 +218,7 @@ const SeatAllocation = () => {
     const confirmMessage =
       "Once seats are confirmed and locked, they cannot be changed or edited later.\n\nAre you sure you want to proceed?";
 
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
+    if (!window.confirm(confirmMessage)) return;
 
     try {
       const result = await confirmSeatSelection(tnr, selections);
@@ -300,9 +289,19 @@ const SeatAllocation = () => {
                 const selectable = isTravellerSelectable(t);
                 const isActive = activePassengerIdx === idx;
                 const sel = selections[idx];
-                const vehicleName = sel
-                  ? getVehicleNameForSeat(sel.seatLabel)
-                  : "";
+
+                let seatDisplay = "Select seat";
+
+                if (isCancelled) {
+                  seatDisplay = "CANCELLED";
+                } else if (isLocked) {
+                  seatDisplay = `Locked: ${getLockedSeatDisplay(t)}`;
+                } else if (sel) {
+                  // Use stored vehicleName from selection (this fixes the issue)
+                  seatDisplay = `Selected: ${sel.seatLabel}${
+                    sel.vehicleName ? ` - ${sel.vehicleName}` : ""
+                  }`;
+                }
 
                 return (
                   <button
@@ -345,13 +344,7 @@ const SeatAllocation = () => {
                                     : "text-slate-500"
                             }`}
                         >
-                          {isCancelled
-                            ? "CANCELLED"
-                            : isLocked
-                              ? `Locked: ${getLockedSeatDisplay(t)}`
-                              : sel
-                                ? `Selected: ${getSelectedSeatDisplay(sel)}`
-                                : "Select seat"}
+                          {seatDisplay}
                         </p>
                       </div>
 
@@ -598,22 +591,19 @@ const SeatAllocation = () => {
         </div>
       </div>
 
-      {/* ULTRA-COMPACT RESPONSIVE FOOTER */}
+      {/* Footer */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-2 sm:p-4 z-[100] shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-6">
-          {/* Selected Summary - Very compact on mobile */}
           <div className="text-center sm:text-left text-xs sm:text-sm w-full sm:w-auto">
             <p className="text-slate-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest">
               Selected
             </p>
             <p className="text-slate-800 font-black">
               {Object.keys(selections).length} /{" "}
-              {booking?.travellers?.filter((t) => isTravellerSelectable(t))
-                ?.length || 0}
+              {booking?.travellers?.filter(isTravellerSelectable)?.length || 0}
             </p>
           </div>
 
-          {/* COLOR LEGEND - Tighter spacing, smaller icons */}
           <div className="bg-slate-50 border border-slate-200 rounded-lg p-2 sm:p-3 text-xs text-slate-700 w-full sm:w-auto max-w-md">
             <p className="font-semibold mb-1.5 text-center sm:text-left text-[9px] sm:text-xs">
               Colors
@@ -642,7 +632,6 @@ const SeatAllocation = () => {
             </div>
           </div>
 
-          {/* Confirm Button - Shorter on mobile */}
           <button
             onClick={handleReserve}
             disabled={Object.keys(selections).length === 0}
@@ -654,8 +643,8 @@ const SeatAllocation = () => {
               }`}
           >
             {Object.keys(selections).length ===
-            booking?.travellers?.filter((t) => isTravellerSelectable(t))?.length
-              ? "Confirm"
+            booking?.travellers?.filter(isTravellerSelectable)?.length
+              ? "Confirm & Lock Seats"
               : `Lock ${Object.keys(selections).length}`}
           </button>
         </div>

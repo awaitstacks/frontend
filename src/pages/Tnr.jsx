@@ -7,31 +7,27 @@ import {
   AlertCircle,
   CheckCircle2,
   Bus,
-  Train,
-  Plane,
   Users,
   CreditCard,
   Calendar,
   Phone,
-  Mail,
   ArrowLeftCircle,
-  Clock3, // for "in process"
-  XCircle, // for cancelled/rejected
+  Clock3,
+  XCircle,
 } from "lucide-react";
 
 const Tnr = () => {
   const { getBookingDetailsByTNR, getSeatAllocationByTNR } =
-    useContext(TourAppContext); // added getSeatAllocationByTNR
+    useContext(TourAppContext);
   const navigate = useNavigate();
 
   const [tnr, setTnr] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [booking, setBooking] = useState(null);
-  const [seatData, setSeatData] = useState(null); // added to fetch vehicle names
+  const [seatData, setSeatData] = useState(null);
   const [showInput, setShowInput] = useState(true);
 
-  // Scroll to top when component mounts or showInput changes
   useEffect(() => {
     if (showInput) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -42,7 +38,7 @@ const Tnr = () => {
     e.preventDefault();
     setError("");
     setBooking(null);
-    setSeatData(null); // reset seat data
+    setSeatData(null);
 
     const upperTnr = tnr.trim().toUpperCase();
 
@@ -56,7 +52,7 @@ const Tnr = () => {
     try {
       const [bookingRes, seatRes] = await Promise.all([
         getBookingDetailsByTNR(upperTnr),
-        getSeatAllocationByTNR(upperTnr), // fetch seat data for vehicle names
+        getSeatAllocationByTNR(upperTnr),
       ]);
 
       if (bookingRes.success) {
@@ -70,7 +66,7 @@ const Tnr = () => {
         setSeatData(seatRes.data);
       }
     } catch (err) {
-      setError("Failed to load details");
+      setError("Failed to load details. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -87,26 +83,18 @@ const Tnr = () => {
   const handleSelectSeat = () => {
     if (booking?.tnr) {
       navigate(`/seat-allocation/${booking.tnr}`);
-      setTimeout(() => {
-        window.scrollTo({
-          top: 0,
-          left: 0,
-          behavior: "smooth",
-        });
-      }, 0);
+      setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 100);
     }
   };
 
-  // NEW: Helper to get vehicle name from seat number
+  // Helper – get vehicle name from seat number (fallback only)
   const getVehicleNameForSeat = (seatNumber) => {
     if (!seatData?.vehicles || !seatNumber) return "";
 
     for (const vehicle of seatData.vehicles) {
-      // Check leader row
       if (vehicle.leaderRow?.includes(seatNumber)) {
         return vehicle.vehicleName || "";
       }
-      // Check passenger rows
       for (const row of vehicle.passengerRows || []) {
         if (row.includes(seatNumber)) {
           return vehicle.vehicleName || "";
@@ -116,7 +104,7 @@ const Tnr = () => {
     return "";
   };
 
-  // Determine status badge (cancellation has priority)
+  // Status badge logic
   const getStatusBadge = () => {
     const cancelled = booking?.cancelled || {};
 
@@ -130,7 +118,7 @@ const Tnr = () => {
     }
     if (cancelled.byTraveller && cancelled.byAdmin) {
       return {
-        text: "Traveller Cancelled",
+        text: "Cancelled by Traveller",
         color: "bg-red-100 text-red-800 border-red-300",
         icon: <XCircle size={20} />,
         isActionable: false,
@@ -138,7 +126,7 @@ const Tnr = () => {
     }
     if (cancelled.byAdmin && !cancelled.byTraveller) {
       return {
-        text: "Booking Rejected",
+        text: "Booking Rejected by Admin",
         color: "bg-red-100 text-red-800 border-red-300",
         icon: <XCircle size={20} />,
         isActionable: false,
@@ -148,7 +136,7 @@ const Tnr = () => {
     return {
       text: booking?.isBookingCompleted
         ? "Booking Completed"
-        : "Booking Active",
+        : "Active Booking",
       color: booking?.isBookingCompleted
         ? "bg-green-100 text-green-800 border-green-300"
         : "bg-amber-100 text-amber-800 border-amber-300",
@@ -174,8 +162,8 @@ const Tnr = () => {
                 Booking Details by TNR
               </h1>
               <p className="text-base sm:text-lg text-gray-700 max-w-xl mx-auto px-2">
-                Enter your 6-digit booking reference to view complete details
-                and proceed.
+                Enter your 6-digit booking reference to view details and select
+                seats.
               </p>
             </div>
 
@@ -204,6 +192,7 @@ const Tnr = () => {
                   )}
                 </button>
               </div>
+
               {error && (
                 <div className="mt-6 flex items-center justify-center gap-3 text-red-700 bg-red-50 p-4 rounded-2xl border border-red-200">
                   <AlertCircle size={24} />
@@ -218,8 +207,7 @@ const Tnr = () => {
           <div className="space-y-8 animate-fade-in">
             <div className="text-center">
               <h2 className="text-3xl sm:text-4xl font-bold text-indigo-900">
-                Booking Details of TNR:{" "}
-                <span className="text-indigo-700">{booking.tnr}</span>
+                TNR: <span className="text-indigo-700">{booking.tnr}</span>
               </h2>
             </div>
 
@@ -232,7 +220,7 @@ const Tnr = () => {
               </div>
             </div>
 
-            {/* Main Booking Card */}
+            {/* Main Booking Info */}
             <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div>
@@ -265,12 +253,12 @@ const Tnr = () => {
                 />
                 <InfoItem
                   icon={<Users />}
-                  label="Total Travellers"
+                  label="Travellers"
                   value={booking.travellers?.length || 0}
                 />
                 <InfoItem
                   icon={<CreditCard />}
-                  label="Advance Payment"
+                  label="Advance"
                   value={
                     <span
                       className={
@@ -285,7 +273,7 @@ const Tnr = () => {
                 />
                 <InfoItem
                   icon={<CreditCard />}
-                  label="Balance Payment"
+                  label="Balance"
                   value={
                     <span
                       className={
@@ -300,8 +288,8 @@ const Tnr = () => {
                 />
                 <InfoItem
                   icon={<CheckCircle2 />}
-                  label="Terms Agreed"
-                  value={booking.termsAgreed ? "Yes" : "No"}
+                  label="Terms"
+                  value={booking.termsAgreed ? "Agreed" : "Not Agreed"}
                 />
                 {booking.contact?.mobile && (
                   <InfoItem
@@ -313,42 +301,36 @@ const Tnr = () => {
               </div>
             </div>
 
-            {/* Travellers Section */}
+            {/* Travellers List */}
             {booking.travellers?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                   <Users size={28} className="text-indigo-600" />
                   Travellers ({booking.travellers.length})
                 </h3>
+
                 <div className="space-y-6">
                   {booking.travellers.map((t, idx) => {
-                    const bookingCancelledByAdmin = booking.cancelled?.byAdmin;
-                    const bookingCancelledByTraveller =
+                    const isCancelled =
+                      t.cancelled?.byAdmin ||
+                      t.cancelled?.byTraveller ||
+                      booking.cancelled?.byAdmin ||
                       booking.cancelled?.byTraveller;
 
-                    const travellerCancelledByAdmin = t.cancelled?.byAdmin;
-                    const travellerCancelledByTraveller =
-                      t.cancelled?.byTraveller;
-
-                    const isCancelled =
-                      bookingCancelledByAdmin ||
-                      bookingCancelledByTraveller ||
-                      travellerCancelledByAdmin ||
-                      travellerCancelledByTraveller;
                     const isRejected =
-                      bookingCancelledByAdmin || travellerCancelledByAdmin;
+                      t.cancelled?.byAdmin || booking.cancelled?.byAdmin;
 
-                    // Get vehicle name
-                    const vehicleName = t.seatNumber
-                      ? getVehicleNameForSeat(t.seatNumber)
-                      : "";
+                    // Prefer stored vehicleName → fallback to lookup for old records
+                    const vehicleName =
+                      t.vehicleName ||
+                      (t.seatNumber ? getVehicleNameForSeat(t.seatNumber) : "");
 
                     return (
                       <div
                         key={idx}
                         className={`p-5 sm:p-6 rounded-2xl border transition-all ${
                           isCancelled
-                            ? "bg-red-50/50 border-red-200"
+                            ? "bg-red-50/70 border-red-200"
                             : "bg-gray-50 border-gray-200 hover:border-indigo-200"
                         }`}
                       >
@@ -358,8 +340,8 @@ const Tnr = () => {
                               <div
                                 className={`mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold uppercase ${
                                   isRejected
-                                    ? "bg-red-100 text-red-800 border border-red-200"
-                                    : "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                                    ? "bg-red-100 text-red-800 border-red-200"
+                                    : "bg-yellow-100 text-yellow-800 border-yellow-200"
                                 }`}
                               >
                                 {isRejected ? (
@@ -368,7 +350,7 @@ const Tnr = () => {
                                   <Clock3 size={14} />
                                 )}
                                 {isRejected
-                                  ? "Cancelled / Rejected"
+                                  ? "Rejected / Cancelled"
                                   : "Cancellation Pending"}
                               </div>
                             )}
@@ -380,7 +362,9 @@ const Tnr = () => {
                             </p>
 
                             <div
-                              className={`mt-2 space-y-1 text-sm sm:text-base ${isRejected ? "text-red-700/60" : "text-gray-600"}`}
+                              className={`mt-2 space-y-1 text-sm sm:text-base ${
+                                isRejected ? "text-red-700/70" : "text-gray-600"
+                              }`}
                             >
                               <p>
                                 Age: {t.age} • {t.gender}
@@ -394,25 +378,25 @@ const Tnr = () => {
                                 <p
                                   className={`font-medium ${isRejected ? "line-through text-red-400" : "text-indigo-700"}`}
                                 >
-                                  Seat: {t.seatNumber}{" "}
-                                  {vehicleName ? ` - ${vehicleName}` : ""}{" "}
-                                  {t.seatLocked ? "(Locked)" : ""}
+                                  Seat: {t.seatNumber}
+                                  {vehicleName && ` - ${vehicleName}`}
+                                  {t.seatLocked && " (Locked)"}
                                 </p>
                               )}
                             </div>
 
                             {t.cancelled?.reason && (
-                              <p className="mt-2 text-xs italic text-red-600">
+                              <p className="mt-3 text-xs italic text-red-600">
                                 Reason: {t.cancelled.reason}
                               </p>
                             )}
                           </div>
 
                           {t.seatNumber && !isRejected && (
-                            <span className="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">
+                            <div className="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap">
                               Seat {t.seatNumber}
-                              {vehicleName ? ` - ${vehicleName}` : ""}
-                            </span>
+                              {vehicleName && ` - ${vehicleName}`}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -430,7 +414,7 @@ const Tnr = () => {
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-lg font-semibold rounded-xl hover:from-indigo-700 hover:to-indigo-800 shadow-lg transform hover:-translate-y-1 transition-all min-w-[220px]"
                 >
                   <Bus size={20} />
-                  Select Seat Now
+                  Select / Change Seat
                 </button>
               )}
 
