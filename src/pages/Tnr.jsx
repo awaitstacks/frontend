@@ -414,7 +414,7 @@ const Tnr = () => {
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-lg font-semibold rounded-xl hover:from-indigo-700 hover:to-indigo-800 shadow-lg transform hover:-translate-y-1 transition-all min-w-[220px]"
                 >
                   <Bus size={20} />
-                  Select / Change Seat
+                  Select Seats
                 </button>
               )}
 
