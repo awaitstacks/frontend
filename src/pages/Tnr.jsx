@@ -14,6 +14,8 @@ import {
   ArrowLeftCircle,
   Clock3,
   XCircle,
+  Train,
+  Plane,
 } from "lucide-react";
 
 const Tnr = () => {
@@ -104,7 +106,6 @@ const Tnr = () => {
     return "";
   };
 
-  // Status badge logic
   const getStatusBadge = () => {
     const cancelled = booking?.cancelled || {};
 
@@ -258,32 +259,48 @@ const Tnr = () => {
                 />
                 <InfoItem
                   icon={<CreditCard />}
-                  label="Advance"
+                  label="Advance Payment"
                   value={
-                    <span
-                      className={
-                        booking.payment?.advance?.paid
-                          ? "text-green-600 font-bold"
-                          : "text-red-600 font-bold"
-                      }
-                    >
-                      {booking.payment?.advance?.paid ? "Paid" : "Pending"}
-                    </span>
+                    <>
+                      <span className="font-bold text-lg">
+                        ₹
+                        {(booking.payment?.advance?.amount || 0).toLocaleString(
+                          "en-IN",
+                        )}
+                      </span>
+                      <span
+                        className={`ml-3 text-sm font-medium ${
+                          booking.payment?.advance?.paid
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {booking.payment?.advance?.paid ? "✓ Paid" : "Pending"}
+                      </span>
+                    </>
                   }
                 />
                 <InfoItem
                   icon={<CreditCard />}
-                  label="Balance"
+                  label="Balance Payment"
                   value={
-                    <span
-                      className={
-                        booking.payment?.balance?.paid
-                          ? "text-green-600 font-bold"
-                          : "text-red-600 font-bold"
-                      }
-                    >
-                      {booking.payment?.balance?.paid ? "Paid" : "Pending"}
-                    </span>
+                    <>
+                      <span className="font-bold text-lg">
+                        ₹
+                        {(booking.payment?.balance?.amount || 0).toLocaleString(
+                          "en-IN",
+                        )}
+                      </span>
+                      <span
+                        className={`ml-3 text-sm font-medium ${
+                          booking.payment?.balance?.paid
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {booking.payment?.balance?.paid ? "✓ Paid" : "Pending"}
+                      </span>
+                    </>
                   }
                 />
                 <InfoItem
@@ -296,6 +313,13 @@ const Tnr = () => {
                     icon={<Phone />}
                     label="Mobile"
                     value={booking.contact.mobile}
+                  />
+                )}
+                {booking.emergencyContact && (
+                  <InfoItem
+                    icon={<Phone />}
+                    label="Emergency Contact"
+                    value={booking.emergencyContact}
                   />
                 )}
               </div>
@@ -320,10 +344,12 @@ const Tnr = () => {
                     const isRejected =
                       t.cancelled?.byAdmin || booking.cancelled?.byAdmin;
 
-                    // Prefer stored vehicleName → fallback to lookup for old records
                     const vehicleName =
                       t.vehicleName ||
                       (t.seatNumber ? getVehicleNameForSeat(t.seatNumber) : "");
+
+                    const hasTrainSeats = t.trainSeats?.length > 0;
+                    const hasFlightSeats = t.flightSeats?.length > 0;
 
                     return (
                       <div
@@ -362,7 +388,7 @@ const Tnr = () => {
                             </p>
 
                             <div
-                              className={`mt-2 space-y-1 text-sm sm:text-base ${
+                              className={`mt-2 space-y-1.5 text-sm sm:text-base ${
                                 isRejected ? "text-red-700/70" : "text-gray-600"
                               }`}
                             >
@@ -374,9 +400,104 @@ const Tnr = () => {
                                 {t.packageType}
                               </p>
 
+                              {(t.boardingPoint?.stationName ||
+                                t.deboardingPoint?.stationName) && (
+                                <div className="mt-2 pt-2 border-t border-gray-200">
+                                  {t.boardingPoint?.stationName && (
+                                    <p>
+                                      <span className="font-medium text-indigo-700">
+                                        Boarding:
+                                      </span>{" "}
+                                      {t.boardingPoint.stationName}
+                                      {t.boardingPoint.stationCode &&
+                                        ` (${t.boardingPoint.stationCode})`}
+                                    </p>
+                                  )}
+                                  {t.deboardingPoint?.stationName && (
+                                    <p>
+                                      <span className="font-medium text-indigo-700">
+                                        Deboarding:
+                                      </span>{" "}
+                                      {t.deboardingPoint.stationName}
+                                      {t.deboardingPoint.stationCode &&
+                                        ` (${t.deboardingPoint.stationCode})`}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+
+                              {t.selectedAddon?.name && (
+                                <p className="mt-1 pt-1 border-t border-gray-200">
+                                  <span className="font-medium text-teal-700">
+                                    Addon:
+                                  </span>{" "}
+                                  {t.selectedAddon.name}{" "}
+                                  <span className="text-green-700 font-medium">
+                                    +₹
+                                    {(
+                                      t.selectedAddon.price || 0
+                                    ).toLocaleString("en-IN")}
+                                  </span>
+                                </p>
+                              )}
+
+                              {/* ─── Train & Flight Seats ──────────────────────────────── */}
+                              {(hasTrainSeats || hasFlightSeats) && (
+                                <div className="mt-2 pt-2 border-t border-gray-200 space-y-1.5">
+                                  {hasTrainSeats && (
+                                    <div className="flex items-start gap-2">
+                                      <Train
+                                        size={16}
+                                        className="text-amber-700 mt-0.5 flex-shrink-0"
+                                      />
+                                      <div>
+                                        <span className="font-medium text-amber-800">
+                                          Train Seat(s):
+                                        </span>
+                                        <div className="text-gray-700">
+                                          {t.trainSeats.map((s, i) => (
+                                            <div key={i}>
+                                              {s.trainName
+                                                ? `${s.trainName} → `
+                                                : ""}
+                                              <strong>{s.seatNo}</strong>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {hasFlightSeats && (
+                                    <div className="flex items-start gap-2">
+                                      <Plane
+                                        size={16}
+                                        className="text-blue-700 mt-0.5 flex-shrink-0"
+                                      />
+                                      <div>
+                                        <span className="font-medium text-blue-800">
+                                          Flight Seat(s):
+                                        </span>
+                                        <div className="text-gray-700">
+                                          {t.flightSeats.map((s, i) => (
+                                            <div key={i}>
+                                              {s.flightName
+                                                ? `${s.flightName} → `
+                                                : ""}
+                                              <strong>{s.seatNo}</strong>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              {/* ─────────────────────────────────────────────────────────── */}
+
                               {t.seatNumber && (
                                 <p
-                                  className={`font-medium ${isRejected ? "line-through text-red-400" : "text-indigo-700"}`}
+                                  className={`font-medium pt-1 ${isRejected ? "line-through text-red-400" : "text-indigo-700"}`}
                                 >
                                   Seat: {t.seatNumber}
                                   {vehicleName && ` - ${vehicleName}`}
