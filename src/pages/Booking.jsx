@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { TourAppContext } from "../context/TourAppContext.jsx";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -58,6 +58,7 @@ const TourBooking = () => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (tours.length > 0) {
@@ -206,9 +207,13 @@ const TourBooking = () => {
     setIsSubmitting(true);
 
     if (!token) {
-      toast.warning("Login to continue");
+      toast.warning("Please login to continue booking");
+      navigate("/login", {
+        state: { from: location.pathname + location.search }, // ← this is the fix
+        replace: true,
+      });
       setIsSubmitting(false);
-      return navigate("/login");
+      return;
     }
 
     if (!userData?._id) {
