@@ -26,7 +26,7 @@ const TourBooking = () => {
       firstName: "",
       lastName: "",
       age: "",
-      gender: "Male", // default for Mr
+      gender: "Male",
       sharingType: "double",
       selectedAddon: null,
       boardingPoint: null,
@@ -59,6 +59,46 @@ const TourBooking = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const STORAGE_KEY = `booking-draft-${tourId}`;
+
+  // Restore saved draft on mount (after login redirect)
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const draft = JSON.parse(saved);
+
+        if (draft.travellers?.length > 0) {
+          setTravellers(draft.travellers);
+        }
+        if (draft.contact?.email || draft.contact?.mobile) {
+          setContact(draft.contact);
+        }
+        if (draft.billingAddress?.city || draft.billingAddress?.pincode) {
+          setBillingAddress(draft.billingAddress);
+        }
+        if (draft.bookingType) {
+          setBookingType(draft.bookingType);
+        }
+
+        // Show toast only if something meaningful was restored
+        if (
+          draft.travellers?.length > 0 ||
+          draft.contact?.email ||
+          draft.billingAddress?.addressLine1
+        ) {
+          toast.info("We restored your previous booking details 😊", {
+            autoClose: 5000,
+          });
+        }
+      } catch (e) {
+        console.warn("Failed to restore booking draft:", e);
+        // Optional: clean broken data
+        // localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  }, [tourId]);
 
   useEffect(() => {
     if (tours.length > 0) {
@@ -134,7 +174,6 @@ const TourBooking = () => {
   const handleTravellerChange = (index, field, value) => {
     const updated = [...travellers];
 
-    // Bidirectional sync: Title ↔ Gender
     if (field === "title") {
       if (value === "Mr") {
         updated[index].gender = "Male";
@@ -145,11 +184,10 @@ const TourBooking = () => {
       if (value === "Male") {
         updated[index].title = "Mr";
       } else if (value === "Female") {
-        updated[index].title = "Ms"; // Default to Ms for Female (user can manually change to Mrs)
+        updated[index].title = "Ms";
       }
     }
 
-    // Age-based sharing type restrictions (unchanged)
     if (field === "age") {
       const age = Number(value);
       if (age > 85) {
@@ -169,7 +207,6 @@ const TourBooking = () => {
 
     updated[index][field] = value;
 
-    // Reset dependent fields when package changes
     if (field === "packageType" || field === "variantPackageIndex") {
       updated[index].boardingPoint = null;
       updated[index].deboardingPoint = null;
@@ -187,7 +224,7 @@ const TourBooking = () => {
         firstName: "",
         lastName: "",
         age: "",
-        gender: "Male", // default for new traveller (Mr)
+        gender: "Male",
         sharingType: "",
         selectedAddon: null,
         boardingPoint: null,
@@ -208,16 +245,29 @@ const TourBooking = () => {
 
     if (!token) {
       toast.warning("Please login to continue booking");
+
+      // Save current form state before redirect
+      const draft = {
+        travellers,
+        contact,
+        billingAddress,
+        bookingType,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+
       navigate("/login", {
-        state: { from: location.pathname + location.search }, // ← this is the fix
+        state: { from: location.pathname + location.search },
         replace: true,
       });
-      setIsSubmitting(false);
-      return;
-    }
 
-    if (!userData?._id) {
-      toast.error("User not found. Please re-login.");
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "smooth",
+        });
+      }, 100);
+
       setIsSubmitting(false);
       return;
     }
@@ -240,7 +290,6 @@ const TourBooking = () => {
     for (let [idx, t] of travellers.entries()) {
       const age = Number(t.age);
 
-      // First Name & Last Name missing check
       if (!t.firstName?.trim()) {
         toast.error(
           `Traveller ${idx + 1}: First Name is required (As per Aadhar).`,
@@ -358,6 +407,10 @@ const TourBooking = () => {
             ? "Offline booking added to My Trolly! Awaiting confirmation."
             : "Booking added to My Trolly! Complete payment from My Trolly.",
         );
+
+        // Clear draft after successful submission
+        localStorage.removeItem(STORAGE_KEY);
+
         navigate("/my-trolly");
       } else {
         toast.error(data.message);
@@ -493,7 +546,6 @@ const TourBooking = () => {
               onChange={(e) => setBookingType(e.target.value)}
             >
               <option value="offline">Offline Booking</option>
-              {/* <option value="online">Online Booking</option> */}
             </select>
           </div>
 
