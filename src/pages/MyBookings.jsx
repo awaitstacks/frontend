@@ -9,12 +9,16 @@ import {
   ChevronUp,
   IndianRupee,
   Users,
-  Copy, // ← Added this import (fixes the error)
+  Copy,
+  Loader2,
+  QrCode,
 } from "lucide-react";
 
 const MyBookings = () => {
-  const { backendUrl, token, currencySymbol } = useContext(TourAppContext);
+  const { backendUrl, token, currencySymbol, getPaymentMethods } =
+    useContext(TourAppContext);
   const [bookings, setBookings] = useState([]);
+  const [paymentMethods, setPaymentMethods] = useState([]);
   const [expandedBooking, setExpandedBooking] = useState(null);
   const [cancelPopup, setCancelPopup] = useState({
     show: false,
@@ -24,9 +28,12 @@ const MyBookings = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [visibleCount, setVisibleCount] = useState(10);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Fetch user bookings
   const getUserBookings = async () => {
+    setLoading(true);
     try {
       const { data } = await axios.get(`${backendUrl}/api/user/my-trolly`, {
         headers: { token },
@@ -35,10 +42,30 @@ const MyBookings = () => {
         setBookings(data.bookings.reverse());
       }
     } catch (error) {
-      console.error(error);
       toast.error(error.message || "Failed to fetch bookings");
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Fetch payment methods once on mount
+  const fetchPaymentMethods = async () => {
+    try {
+      const res = await getPaymentMethods();
+      if (res?.success) {
+        setPaymentMethods(res.paymentMethods || []);
+      }
+    } catch (err) {
+      console.error("Failed to load payment methods:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      getUserBookings();
+      fetchPaymentMethods();
+    }
+  }, [token]);
 
   useEffect(() => {
     setVisibleCount(10);
@@ -59,12 +86,7 @@ const MyBookings = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error(error);
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to cancel traveller",
-      );
+      toast.error(error.message || "Failed to cancel traveller");
     } finally {
       setCancelPopup({ show: false, tnr: null, travellerId: null });
     }
@@ -93,7 +115,6 @@ const MyBookings = () => {
             toast.error(data.message);
           }
         } catch (error) {
-          console.error(error);
           toast.error(error.message || "Payment verification failed");
         }
       },
@@ -115,14 +136,9 @@ const MyBookings = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error(error);
       toast.error(error.message || "Payment initiation failed");
     }
   };
-
-  useEffect(() => {
-    if (token) getUserBookings();
-  }, [token]);
 
   const slotDateFormat = (dateStr) => {
     const d = new Date(dateStr);
@@ -222,341 +238,472 @@ const MyBookings = () => {
   };
 
   return (
-    <div
-      className="
-        w-full 
-        max-w-[98%] xs:max-w-[96%] sm:max-w-[98%] md:max-w-[96vw] 
-        lg:max-w-[94vw] xl:max-w-[92vw] 2xl:max-w-[90vw]
-        rounded-3xl sm:rounded-[2.5rem] md:rounded-[3rem] lg:rounded-[3.5rem] xl:rounded-[4rem]
-        backdrop-blur-xl bg-white/40 border border-white/50
-        shadow-2xl md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.12)]
-        overflow-hidden
-        p-8 xs:p-10 sm:p-12 md:p-16 lg:p-20 xl:p-24
-      "
-    >
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center">
-          My Trolly
-        </h1>
+    <>
+      {/* Internal CSS for subtle blinking effect */}
+      <style>{`
+        @keyframes blink-slow {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.75; }
+        }
+        .blink-slow {
+          animation: blink-slow 3s ease-in-out infinite;
+        }
+      `}</style>
 
-        {/* Filters */}
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg mb-8 flex flex-col md:flex-row gap-4">
-          <input
-            type="text"
-            placeholder="Search by tour title..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-5 py-4 rounded-xl border border-gray-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
-          />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-5 py-4 rounded-xl border border-gray-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
-          >
-            <option value="all">All Statuses</option>
-            <option value="advance">Advance Pending</option>
-            <option value="balance">Balance Pending</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
+      <div className="min-h-screen bg-gray-50/50 py-6 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center">
+            My Trolly
+          </h1>
 
-        <div className="space-y-8">
-          {displayedBookings.length === 0 ? (
-            <p className="text-center text-gray-600 text-xl py-12">
+          {/* Filters */}
+          <div className="bg-white/80 backdrop-blur-md rounded-2xl p-5 sm:p-6 shadow-lg mb-8 flex flex-col md:flex-row gap-4">
+            <input
+              type="text"
+              placeholder="Search by tour title..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all outline-none text-sm sm:text-base"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all outline-none md:w-48 text-sm sm:text-base"
+            >
+              <option value="all">All Statuses</option>
+              <option value="advance">Advance Pending</option>
+              <option value="balance">Balance Pending</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <Loader2 className="animate-spin text-indigo-600" size={48} />
+            </div>
+          ) : displayedBookings.length === 0 ? (
+            <p className="text-center text-gray-600 text-lg sm:text-xl py-12">
               No bookings found.
             </p>
           ) : (
-            displayedBookings.map((item) => (
-              <div
-                key={item.tnr} // ← Use tnr as key (safe & unique)
-                className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl"
-              >
+            <div className="space-y-6 md:space-y-8">
+              {displayedBookings.map((item) => (
                 <div
-                  className="flex flex-col md:flex-row gap-6 cursor-pointer"
-                  onClick={() =>
-                    setExpandedBooking(
-                      expandedBooking === item.tnr ? null : item.tnr,
-                    )
-                  }
+                  key={item.tnr}
+                  className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-5 sm:p-6 transition-all duration-300 hover:shadow-xl overflow-hidden"
                 >
-                  <img
-                    src={item.tourData.titleImage}
-                    alt={item.tourData.title}
-                    className="w-full md:w-48 h-32 object-cover rounded-xl"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h2 className="text-2xl font-bold text-gray-800">
-                        {item.tourData.title}
-                      </h2>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-semibold text-gray-800">
-                          TNR:{" "}
-                          <code className="bg-gray-100 px-2 py-1 rounded font-mono text-lg">
-                            {item.tnr || "N/A"}
-                          </code>
-                        </span>
-                        {item.tnr && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigator.clipboard.writeText(item.tnr);
-                              toast.success("TNR copied!");
-                            }}
-                            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition"
-                            title="Copy TNR"
-                          >
-                            <Copy size={20} />
-                          </button>
-                        )}
+                  {/* Booking Header */}
+                  <div
+                    className="flex flex-col sm:flex-row gap-5 cursor-pointer"
+                    onClick={() =>
+                      setExpandedBooking(
+                        expandedBooking === item.tnr ? null : item.tnr,
+                      )
+                    }
+                  >
+                    <img
+                      src={item.tourData.titleImage}
+                      alt={item.tourData.title}
+                      className="w-full sm:w-40 md:w-48 h-32 object-cover rounded-xl flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-3">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 truncate">
+                          {item.tourData.title}
+                        </h2>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-sm sm:text-lg font-semibold text-gray-800">
+                            TNR:{" "}
+                            <code className="bg-gray-100 px-2 py-1 rounded font-mono text-xs sm:text-sm">
+                              {item.tnr || "N/A"}
+                            </code>
+                          </span>
+                          {item.tnr && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(item.tnr);
+                                toast.success("TNR copied!");
+                              }}
+                              className="text-blue-600 hover:text-blue-800 p-1.5 rounded hover:bg-blue-50 transition"
+                              title="Copy TNR"
+                            >
+                              <Copy size={20} />
+                            </button>
+                          )}
+                        </div>
                       </div>
+
+                      <p className="text-gray-600 mb-1 text-xs sm:text-sm truncate">
+                        Duration: {item.tourData.duration?.days} Days /{" "}
+                        {item.tourData.duration?.nights} Nights
+                      </p>
+                      <p className="text-gray-600 mb-1 text-xs sm:text-sm">
+                        Booking Date: {slotDateFormat(item.bookingDate)}
+                      </p>
+
+                      {/* Advance & Balance Amounts */}
+                      <div className="flex flex-col sm:flex-row gap-3 mt-2 text-xs sm:text-sm">
+                        <p className="flex items-center gap-1">
+                          <span className="font-semibold text-gray-800">
+                            Advance:
+                          </span>{" "}
+                          {currencySymbol}
+                          {item.payment?.advance?.amount?.toLocaleString() ||
+                            "0"}{" "}
+                          <span
+                            className={
+                              item.payment?.advance?.paid
+                                ? "text-green-600"
+                                : "text-amber-600"
+                            }
+                          >
+                            ({item.payment?.advance?.paid ? "Paid" : "Pending"})
+                          </span>
+                        </p>
+                        <p className="flex items-center gap-1">
+                          <span className="font-semibold text-gray-800">
+                            Balance:
+                          </span>{" "}
+                          {currencySymbol}
+                          {item.payment?.balance?.amount?.toLocaleString() ||
+                            "0"}{" "}
+                          <span
+                            className={
+                              item.payment?.balance?.paid
+                                ? "text-green-600"
+                                : "text-amber-600"
+                            }
+                          >
+                            ({item.payment?.balance?.paid ? "Paid" : "Pending"})
+                          </span>
+                        </p>
+                      </div>
+
+                      <p className="text-indigo-700 font-medium mt-1 text-xs sm:text-sm">
+                        Status: {renderStatus(item)}
+                      </p>
                     </div>
 
-                    <p className="text-gray-600 mb-1">
-                      Duration: {item.tourData.duration?.days} Days /{" "}
-                      {item.tourData.duration?.nights} Nights
-                    </p>
-                    <p className="text-gray-600 mb-1">
-                      Booking Date: {slotDateFormat(item.bookingDate)}
-                    </p>
-                    <p className="text-indigo-700 font-medium">
-                      Status: {renderStatus(item)}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col gap-2 justify-center md:justify-end">
-                    {item.bookingType === "online" && (
-                      <>
-                        {allTravellersCancelled(item) ? (
-                          <span className="px-4 py-2 bg-red-100 text-red-700 rounded-xl font-medium text-center">
-                            Booking Cancelled
-                          </span>
-                        ) : (
-                          <>
-                            {!item.payment?.advance?.paid && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  bookingRazorpay(item.tnr, "advance");
-                                }}
-                                className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-xl font-medium hover:bg-indigo-200 transition-all"
-                              >
-                                Pay Advance
-                              </button>
-                            )}
-                            {canShowBalanceButton(item) && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  bookingRazorpay(item.tnr, "balance");
-                                }}
-                                className="px-4 py-2 bg-green-100 text-green-700 rounded-xl font-medium hover:bg-green-200 transition-all"
-                              >
-                                Pay Balance
-                              </button>
-                            )}
-                            {item.isBookingCompleted && (
-                              <span className="px-4 py-2 bg-green-100 text-green-700 rounded-xl font-medium text-center">
-                                Booking Completed
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-
-                    {item.bookingType === "offline" && (
-                      <>
-                        {allTravellersCancelled(item) ? (
-                          <span className="px-4 py-2 bg-red-100 text-red-700 rounded-xl font-medium text-center">
-                            Booking Cancelled
-                          </span>
-                        ) : (
-                          <>
-                            {!item.payment?.advance?.paid && (
-                              <span className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium text-center">
-                                Awaiting Confirmation
-                              </span>
-                            )}
-                            {item.payment?.advance?.paid &&
-                              !item.payment?.balance?.paid && (
-                                <span className="px-4 py-2 bg-green-100 text-green-700 rounded-xl font-medium text-center">
-                                  Advance Received
-                                </span>
-                              )}
-                            {item.payment?.balance?.paid &&
-                              !item.isBookingCompleted && (
-                                <span className="px-4 py-2 bg-green-100 text-green-700 rounded-xl font-medium text-center">
-                                  Balance Received
-                                </span>
-                              )}
-                            {item.isBookingCompleted && (
-                              <span className="px-4 py-2 bg-green-100 text-green-700 rounded-xl font-medium text-center">
-                                Booking Completed
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {expandedBooking === item.tnr && (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                      Traveller Details
-                    </h3>
-                    <div className="space-y-4">
-                      {item.travellers?.map((traveller, idx) => {
-                        const byT = traveller?.cancelled?.byTraveller;
-                        const byA = traveller?.cancelled?.byAdmin;
-
-                        let travellerBadge = null;
-                        if (byT && byA) travellerBadge = "Cancelled";
-                        else if (byT && !byA)
-                          travellerBadge = "Cancellation Requested";
-                        else if (!byT && byA)
-                          travellerBadge = "Rejected by Admin";
-
-                        const canCancel =
-                          !traveller.cancelled?.byTraveller &&
-                          !traveller.cancelled?.byAdmin &&
-                          item.payment?.advance?.paid;
-
-                        return (
-                          <div
-                            key={idx}
-                            className="bg-indigo-50/50 rounded-xl p-5 transition-all duration-300 hover:bg-indigo-100/50 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-                          >
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-800">
-                                Name: {traveller.title} {traveller.firstName}{" "}
-                                {traveller.lastName}
-                              </p>
-                              <p className="text-gray-600">
-                                Age: {traveller.age} | Gender:{" "}
-                                {traveller.gender}
-                              </p>
-                              <p className="text-gray-600">
-                                Package:{" "}
-                                {traveller.packageType === "main"
-                                  ? "Main Package"
-                                  : `Variant ${traveller.variantPackageIndex + 1}`}
-                              </p>
-                              <p className="text-gray-600">
-                                Sharing: {traveller.sharingType}
-                              </p>
-                              {traveller.selectedAddon && (
-                                <p className="text-gray-600">
-                                  Add-ons: {traveller.selectedAddon.name} (+
-                                  {currencySymbol}
-                                  {traveller.selectedAddon.price})
-                                </p>
-                              )}
-                              <p className="text-gray-600">
-                                Boarding: {traveller.boardingPoint?.stationName}{" "}
-                                ({traveller.boardingPoint?.stationCode})
-                              </p>
-                              <p className="text-gray-600">
-                                Deboarding:{" "}
-                                {traveller.deboardingPoint?.stationName} (
-                                {traveller.deboardingPoint?.stationCode})
-                              </p>
-                              {traveller.remarks && (
-                                <p className="text-gray-600">
-                                  Remarks: {traveller.remarks}
-                                </p>
-                              )}
-                              {travellerBadge && (
-                                <span
-                                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-3 ${
-                                    travellerBadge === "Cancelled"
-                                      ? "bg-red-100 text-red-700"
-                                      : travellerBadge ===
-                                          "Cancellation Requested"
-                                        ? "bg-orange-100 text-orange-700"
-                                        : "bg-purple-100 text-purple-700"
-                                  }`}
+                    {/* Payment Buttons */}
+                    <div className="flex flex-col gap-2 justify-center sm:justify-end flex-shrink-0 mt-4 sm:mt-0">
+                      {item.bookingType === "online" && (
+                        <>
+                          {allTravellersCancelled(item) ? (
+                            <span className="px-5 py-2.5 bg-red-100 text-red-700 rounded-xl font-medium text-center text-xs sm:text-sm">
+                              Booking Cancelled
+                            </span>
+                          ) : (
+                            <>
+                              {!item.payment?.advance?.paid && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    bookingRazorpay(item.tnr, "advance");
+                                  }}
+                                  className="px-5 py-2.5 bg-indigo-100 text-indigo-700 rounded-xl font-medium hover:bg-indigo-200 transition-all text-xs sm:text-sm"
                                 >
-                                  {travellerBadge}
+                                  Pay Advance ({currencySymbol}
+                                  {item.payment?.advance?.amount?.toLocaleString() ||
+                                    "0"}
+                                  )
+                                </button>
+                              )}
+                              {canShowBalanceButton(item) && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    bookingRazorpay(item.tnr, "balance");
+                                  }}
+                                  className="px-5 py-2.5 bg-green-100 text-green-700 rounded-xl font-medium hover:bg-green-200 transition-all text-xs sm:text-sm"
+                                >
+                                  Pay Balance ({currencySymbol}
+                                  {item.payment?.balance?.amount?.toLocaleString() ||
+                                    "0"}
+                                  )
+                                </button>
+                              )}
+                              {item.isBookingCompleted && (
+                                <span className="px-5 py-2.5 bg-green-100 text-green-700 rounded-xl font-medium text-center text-xs sm:text-sm">
+                                  Booking Completed
                                 </span>
+                              )}
+                            </>
+                          )}
+                        </>
+                      )}
+
+                      {item.bookingType === "offline" && (
+                        <>
+                          {allTravellersCancelled(item) ? (
+                            <span className="px-5 py-2.5 bg-red-100 text-red-700 rounded-xl font-medium text-center text-xs sm:text-sm">
+                              Booking Cancelled
+                            </span>
+                          ) : (
+                            <>
+                              {!item.payment?.advance?.paid && (
+                                <span className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium text-center text-xs sm:text-sm">
+                                  Awaiting Confirmation
+                                </span>
+                              )}
+                              {item.payment?.advance?.paid &&
+                                !item.payment?.balance?.paid && (
+                                  <span className="px-5 py-2.5 bg-green-100 text-green-700 rounded-xl font-medium text-center text-xs sm:text-sm">
+                                    Advance Received
+                                  </span>
+                                )}
+                              {item.payment?.balance?.paid &&
+                                !item.isBookingCompleted && (
+                                  <span className="px-5 py-2.5 bg-green-100 text-green-700 rounded-xl font-medium text-center text-xs sm:text-sm">
+                                    Balance Received
+                                  </span>
+                                )}
+                              {item.isBookingCompleted && (
+                                <span className="px-5 py-2.5 bg-green-100 text-green-700 rounded-xl font-medium text-center text-xs sm:text-sm">
+                                  Booking Completed
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Expanded Traveller Details */}
+                  {expandedBooking === item.tnr && (
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+                        Traveller Details
+                      </h3>
+                      <div className="space-y-4">
+                        {item.travellers?.map((traveller, idx) => {
+                          const byT = traveller?.cancelled?.byTraveller;
+                          const byA = traveller?.cancelled?.byAdmin;
+
+                          let travellerBadge = null;
+                          if (byT && byA) travellerBadge = "Cancelled";
+                          else if (byT && !byA)
+                            travellerBadge = "Cancellation Requested";
+                          else if (!byT && byA)
+                            travellerBadge = "Rejected by Admin";
+
+                          const canCancel =
+                            !traveller.cancelled?.byTraveller &&
+                            !traveller.cancelled?.byAdmin &&
+                            item.payment?.advance?.paid;
+
+                          return (
+                            <div
+                              key={idx}
+                              className="bg-indigo-50/50 rounded-xl p-5 transition-all duration-300 hover:bg-indigo-100/50 flex flex-col gap-3"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-800 truncate">
+                                  {traveller.title} {traveller.firstName}{" "}
+                                  {traveller.lastName}
+                                </p>
+                                <p className="text-gray-600 text-xs sm:text-sm">
+                                  Age: {traveller.age} | Gender:{" "}
+                                  {traveller.gender}
+                                </p>
+                                <p className="text-gray-600 text-xs sm:text-sm">
+                                  Package:{" "}
+                                  {traveller.packageType === "main"
+                                    ? "Main Package"
+                                    : `Variant ${traveller.variantPackageIndex + 1}`}
+                                </p>
+                                <p className="text-gray-600 text-xs sm:text-sm">
+                                  Sharing: {traveller.sharingType}
+                                </p>
+                                {traveller.selectedAddon && (
+                                  <p className="text-gray-600 text-xs sm:text-sm">
+                                    Add-ons: {traveller.selectedAddon.name} (+
+                                    {currencySymbol}
+                                    {traveller.selectedAddon.price})
+                                  </p>
+                                )}
+                                <p className="text-gray-600 text-xs sm:text-sm truncate">
+                                  Boarding:{" "}
+                                  {traveller.boardingPoint?.stationName} (
+                                  {traveller.boardingPoint?.stationCode})
+                                </p>
+                                <p className="text-gray-600 text-xs sm:text-sm truncate">
+                                  Deboarding:{" "}
+                                  {traveller.deboardingPoint?.stationName} (
+                                  {traveller.deboardingPoint?.stationCode})
+                                </p>
+                                {traveller.remarks && (
+                                  <p className="text-gray-600 text-xs sm:text-sm truncate">
+                                    Remarks: {traveller.remarks}
+                                  </p>
+                                )}
+                                {travellerBadge && (
+                                  <span
+                                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-3 ${
+                                      travellerBadge === "Cancelled"
+                                        ? "bg-red-100 text-red-700"
+                                        : travellerBadge ===
+                                            "Cancellation Requested"
+                                          ? "bg-orange-100 text-orange-700"
+                                          : "bg-purple-100 text-purple-700"
+                                    }`}
+                                  >
+                                    {travellerBadge}
+                                  </span>
+                                )}
+                              </div>
+
+                              {canCancel && (
+                                <div>
+                                  <button
+                                    onClick={() =>
+                                      setCancelPopup({
+                                        show: true,
+                                        tnr: item.tnr,
+                                        travellerId: traveller._id,
+                                      })
+                                    }
+                                    className="w-full sm:w-auto px-5 py-2 bg-red-100 text-red-700 rounded-xl font-medium hover:bg-red-200 transition-all shadow-sm hover:shadow text-xs sm:text-sm"
+                                  >
+                                    Cancel Traveller
+                                  </button>
+                                </div>
                               )}
                             </div>
-
-                            {canCancel && (
-                              <div className="md:self-center">
-                                <button
-                                  onClick={() =>
-                                    setCancelPopup({
-                                      show: true,
-                                      tnr: item.tnr,
-                                      travellerId: traveller._id,
-                                    })
-                                  }
-                                  className="w-full md:w-auto px-5 py-2 bg-red-100 text-red-700 rounded-xl font-medium hover:bg-red-200 transition-all shadow-sm hover:shadow"
-                                >
-                                  Cancel Traveller
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))
+                  )}
+                </div>
+              ))}
+
+              {filteredBookings.length > visibleCount && (
+                <div className="text-center py-8">
+                  <button
+                    onClick={handleShowMore}
+                    className="px-8 py-3 bg-indigo-100 text-indigo-700 rounded-xl font-medium hover:bg-indigo-200 transition-all shadow-md hover:shadow-lg text-sm sm:text-base"
+                  >
+                    Show More
+                  </button>
+                </div>
+              )}
+            </div>
           )}
 
-          {filteredBookings.length > visibleCount && (
-            <div className="text-center py-8">
-              <button
-                onClick={handleShowMore}
-                className="px-8 py-3 bg-indigo-100 text-indigo-700 rounded-xl font-medium hover:bg-indigo-200 transition-all shadow-md hover:shadow-lg"
-              >
-                Show More
-              </button>
+          {/* Single Payment Methods Section – Only if bookings exist */}
+          {bookings.length > 0 && paymentMethods.length > 0 && (
+            <div className="mt-12 bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-6 lg:p-8 border border-gray-200">
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-5 text-center">
+                Make Payment Using
+              </h3>
+
+              {/* Blinking Instruction Message */}
+              <p className="text-base sm:text-lg text-indigo-700 bg-indigo-50/80 p-4 rounded-xl mb-6 text-center font-medium blink-slow">
+                Kindly paste your booking TNR in the description/note/remarks
+                while making payment for easy tracking.
+              </p>
+
+              {/* Payment Methods Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {paymentMethods.map((method) => (
+                  <div
+                    key={method._id}
+                    className="bg-gray-50 rounded-xl p-5 sm:p-6 border border-gray-200 hover:border-indigo-300 transition-all duration-300 shadow-sm hover:shadow-md"
+                  >
+                    <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                      {method.type === "bank" ? (
+                        <IndianRupee className="text-indigo-600" size={28} />
+                      ) : (
+                        <QrCode className="text-teal-600" size={28} />
+                      )}
+                      <h4 className="font-semibold text-gray-800 text-base sm:text-lg capitalize">
+                        {method.type} Payment
+                      </h4>
+                    </div>
+
+                    {method.type === "bank" ? (
+                      <div className="text-sm sm:text-base text-gray-700 space-y-1.5 sm:space-y-2">
+                        <p className="break-all hyphens-auto">
+                          <strong>A/C No:</strong> {method.accountNumber}
+                        </p>
+                        <p>
+                          <strong>IFSC:</strong> {method.ifsc}
+                        </p>
+                        {method.swift && (
+                          <p>
+                            <strong>Swift:</strong> {method.swift}
+                          </p>
+                        )}
+                        <p className="break-all hyphens-auto">
+                          <strong>Beneficiary:</strong> {method.beneficiary}
+                        </p>
+                        <p className="text-xs sm:text-sm text-gray-500 italic">
+                          {method.accountType}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="text-sm sm:text-base text-gray-700 space-y-1.5 sm:space-y-2">
+                        <p className="break-all hyphens-auto">
+                          <strong>UPI ID:</strong> {method.upiId}
+                        </p>
+                        <p>
+                          <strong>Phone:</strong> {method.phone}
+                        </p>
+                        {method.qrImage && (
+                          <div className="mt-4 flex justify-center">
+                            <img
+                              src={method.qrImage}
+                              alt="UPI QR Code - Scan to Pay"
+                              className="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-xl border-2 border-gray-300 shadow-md hover:shadow-lg transition-shadow"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Cancel Confirmation Popup */}
+          {cancelPopup.show && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 px-4">
+              <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 sm:p-8 shadow-2xl max-w-md w-full text-center transition-all duration-300 scale-100">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+                  Confirm Cancellation?
+                </h3>
+                <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                  This action cannot be undone. Are you sure?
+                </p>
+                <div className="flex justify-center gap-4">
+                  <button
+                    onClick={() =>
+                      setCancelPopup({
+                        show: false,
+                        tnr: null,
+                        travellerId: null,
+                      })
+                    }
+                    className="px-5 py-2.5 sm:px-6 sm:py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-all text-sm sm:text-base"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmCancellation}
+                    className="px-5 py-2.5 sm:px-6 sm:py-3 bg-red-100 text-red-700 rounded-xl font-medium hover:bg-red-200 transition-all text-sm sm:text-base"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
-
-        {/* Cancel Confirmation Popup */}
-        {cancelPopup.show && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl p-8 shadow-2xl max-w-md w-full text-center transition-all duration-300 scale-100">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
-                Confirm Cancellation?
-              </h3>
-              <p className="text-gray-600 mb-6">
-                This action cannot be undone. Are you sure?
-              </p>
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() =>
-                    setCancelPopup({
-                      show: false,
-                      tnr: null,
-                      travellerId: null,
-                    })
-                  }
-                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmCancellation}
-                  className="px-6 py-3 bg-red-100 text-red-700 rounded-xl font-medium hover:bg-red-200 transition-all"
-                >
-                  Confirm
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
-    </div>
+    </>
   );
 };
 

@@ -3,7 +3,7 @@
 /* eslint-disable react-refresh/only-export-components */
 // context/TourAppContext.jsx
 
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -288,6 +288,32 @@ const TourAppContextProvider = (props) => {
       return { success: false, message: msg };
     }
   };
+  const getPaymentMethods = useCallback(async () => {
+    try {
+      const { data } = await axios.get(
+        `${backendUrl}/api/user/payment-methods`,
+        {
+          headers: { token }, // optional: if auth needed
+        },
+      );
+
+      if (data.success) {
+        return {
+          success: true,
+          paymentMethods: data.paymentMethods || [],
+          count: data.count || 0,
+        };
+      } else {
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      const msg =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch payment methods";
+      return { success: false, message: msg };
+    }
+  }, [backendUrl, token]);
   // ────────────────────────────────────────────────
   //                   Context Value
   // ────────────────────────────────────────────────
@@ -318,6 +344,7 @@ const TourAppContextProvider = (props) => {
     getBookingDetailsByTNR,
     backendUrl,
     confirmSeatSelection,
+    getPaymentMethods,
   };
 
   // ────────────────────────────────────────────────
