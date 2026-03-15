@@ -647,7 +647,7 @@ const MyBookings = () => {
                           <strong>Beneficiary:</strong> {method.beneficiary}
                         </p>
                         <p className="text-xs sm:text-sm text-gray-500 italic">
-                          {method.accountType}
+                          {method.accountType} account
                         </p>
                       </div>
                     ) : (
