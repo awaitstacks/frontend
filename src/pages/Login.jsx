@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { TourAppContext } from "../context/TourAppContext";
 import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
@@ -8,11 +8,18 @@ import axios from "axios";
 const Login = () => {
   const { backendUrl, token, setToken } = useContext(TourAppContext);
   const navigate = useNavigate();
+  const location = useLocation(); // ← Added to read return path
 
   const [state, setState] = useState("Sign up");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+
+  // Helper to handle redirect after successful auth
+  const redirectAfterSuccess = () => {
+    const from = location.state?.from || "/";
+    navigate(from, { replace: true });
+  };
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -27,6 +34,7 @@ const Login = () => {
           localStorage.setItem("token", data.token);
           setToken(data.token);
           toast.success("Account created successfully! 🌟");
+          redirectAfterSuccess();
         } else {
           toast.error(data.message);
         }
@@ -39,6 +47,7 @@ const Login = () => {
           localStorage.setItem("token", data.token);
           setToken(data.token);
           toast.success("Welcome back! 💙");
+          redirectAfterSuccess();
         } else {
           toast.error(data.message);
         }
@@ -61,7 +70,7 @@ const Login = () => {
         localStorage.setItem("token", data.token);
         setToken(data.token);
         toast.success("Logged in with Google! 🌍");
-        navigate("/");
+        redirectAfterSuccess();
       } else {
         toast.error(data.message || "Google login failed");
       }
@@ -72,9 +81,10 @@ const Login = () => {
 
   useEffect(() => {
     if (token) {
-      navigate("/");
+      const from = location.state?.from || "/";
+      navigate(from, { replace: true });
     }
-  }, [token, navigate]);
+  }, [token, navigate, location.state]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8 sm:py-12">
@@ -167,7 +177,7 @@ const Login = () => {
             />
           </div>
 
-          {/* Submit Button - larger & responsive */}
+          {/* Submit Button */}
           <button
             type="submit"
             className="

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import React, { useContext, useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { TourAppContext } from "../context/TourAppContext.jsx";
 import { toast } from "react-toastify";
 import jsPDF from "jspdf";
@@ -9,6 +9,7 @@ import jsPDF from "jspdf";
 const TourDetails = () => {
   const { tourId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation(); // ← Added to capture current URL
   const { tours, currencySymbol, token, userData } = useContext(TourAppContext);
 
   const [tour, setTour] = useState(null);
@@ -93,31 +94,17 @@ const TourDetails = () => {
 
     setBookingLoading(true);
 
-    // ────────────────────────────────────────────────
-    //   LOGIN CHECK → REDIRECT TO BOOKING OR LOGIN
-    // ────────────────────────────────────────────────
     if (!token || !userData?._id) {
-      // Not logged in → redirect to login
+      // Not logged in → redirect to login with return path
       toast.info("Please login or create an account to continue booking");
 
-      navigate("/login");
-
-      // Scroll to top after navigation (small delay ensures route changes first)
-      setTimeout(() => {
-        window.scrollTo({
-          top: 0,
-          left: 0,
-          behavior: "smooth", // smooth scroll (feels natural)
-        });
-      }, 100); // 100ms is usually enough
+      navigate("/login", {
+        state: { from: location.pathname + location.search },
+        replace: true,
+      });
     } else {
       // Already logged in → go to booking
       navigate(`/booking/${tour._id}`);
-
-      // Optional: scroll here too if needed
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }, 100);
     }
 
     setTimeout(() => {
@@ -590,7 +577,6 @@ const TourDetails = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
             <SoldOutMessage />
 
-            {/* Optional: Show Gallery even for sold-out tours */}
             {tour.galleryImages?.length > 0 && (
               <section className="mt-16 animate-fade-up">
                 <h2 className="text-2xl sm:text-3xl font-bold text-indigo-700 mb-8 text-center">
@@ -777,7 +763,6 @@ const TourDetails = () => {
           transition: opacity 1s ease, transform 1s ease;
         }
 
-        /* Scroll animation for completed trips banner */
         #completed-trips-banner {
           opacity: 0;
           transform: translateY(48px);
@@ -788,16 +773,12 @@ const TourDetails = () => {
           transform: translateY(0);
         }
 
-        /* Bouncing celebration emojis */
         @keyframes bounce-slow {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-20px); }
         }
         .animate-bounce-slow {
           animation: bounce-slow 4s ease-in-out infinite;
-        }
-        .delay-300 {
-          animation-delay: 0.3s;
         }
       `}</style>
     </>
