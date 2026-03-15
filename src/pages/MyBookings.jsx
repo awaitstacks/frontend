@@ -625,6 +625,13 @@ const MyBookings = () => {
 
                     {method.type === "bank" ? (
                       <div className="text-sm sm:text-base text-gray-700 space-y-1.5 sm:space-y-2">
+                        <p>
+                          <strong>Bank Name:</strong> {method.bankName || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Branch Name:</strong>{" "}
+                          {method.branchName || "N/A"}
+                        </p>
                         <p className="break-all hyphens-auto">
                           <strong>A/C No:</strong> {method.accountNumber}
                         </p>
@@ -649,7 +656,7 @@ const MyBookings = () => {
                           <strong>UPI ID:</strong> {method.upiId}
                         </p>
                         <p>
-                          <strong>Phone:</strong> {method.phone}
+                          <strong>Gpay(Only):</strong> {method.phone}
                         </p>
                         {method.qrImage && (
                           <div className="mt-4 flex justify-center">
