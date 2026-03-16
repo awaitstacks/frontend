@@ -63,8 +63,17 @@ const TermsAgreementPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!emergencyContact || !/^[0-9]{10}$/.test(emergencyContact)) {
-      toast.error("Please enter a valid 10-digit emergency contact number");
+    const trimmed = emergencyContact.trim();
+
+    if (!trimmed) {
+      toast.error("Emergency contact is required");
+      return;
+    }
+
+    if (!/^[\d+\-\s()]{7,25}$/.test(trimmed)) {
+      toast.error(
+        "Invalid emergency contact format. Use digits, +, -, spaces or parentheses (7–25 characters).",
+      );
       return;
     }
 
@@ -72,7 +81,6 @@ const TermsAgreementPage = () => {
       toast.error("You must agree to the terms and conditions");
       return;
     }
-
     setIsSubmitting(true);
 
     const result = await submitBookingTermsAgreement(
@@ -324,13 +332,10 @@ const TermsAgreementPage = () => {
             <input
               type="tel"
               inputMode="numeric"
-              pattern="[0-9]{10}"
               value={emergencyContact}
-              onChange={(e) =>
-                setEmergencyContact(e.target.value.replace(/\D/g, ""))
-              }
-              maxLength={10}
-              placeholder="10-digit mobile number"
+              onChange={(e) => setEmergencyContact(e.target.value)}
+              maxLength={25}
+              placeholder="Emergency contact (with country code if international)"
               className="w-full px-5 py-4 border border-gray-300 rounded-xl text-lg sm:text-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
               required
             />

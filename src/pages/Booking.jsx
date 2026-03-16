@@ -273,7 +273,6 @@ const TourBooking = () => {
     }
 
     const emailRegex = /.+@.+\..+/;
-    const mobileRegex = /^[0-9]{10}$/;
 
     if (!emailRegex.test(contact.email)) {
       toast.error("Please enter a valid email address.");
@@ -281,8 +280,11 @@ const TourBooking = () => {
       return;
     }
 
-    if (!mobileRegex.test(contact.mobile)) {
-      toast.error("Please enter a valid 10-digit mobile number.");
+    const mobile = contact.mobile?.trim() || "";
+    if (mobile && !/^[+\d\s()-]{8,20}$/.test(mobile)) {
+      toast.error(
+        "Mobile number should be 8–20 characters (digits, +, space, -, () allowed).",
+      );
       setIsSubmitting(false);
       return;
     }
@@ -412,6 +414,10 @@ const TourBooking = () => {
         localStorage.removeItem(STORAGE_KEY);
 
         navigate("/my-trolly");
+        // Scroll to top after navigation
+        setTimeout(() => {
+          window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        }, 100); // small delay ensures navigation completes first
       } else {
         toast.error(data.message);
       }
@@ -572,7 +578,7 @@ const TourBooking = () => {
               <input
                 type="tel"
                 className="w-full px-4 sm:px-5 py-3 sm:py-4 rounded-xl border border-gray-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all duration-300 outline-none"
-                placeholder="10-digit mobile number"
+                placeholder="Mobile number (with country code if international)"
                 value={contact.mobile}
                 onChange={(e) =>
                   setContact((prev) => ({ ...prev, mobile: e.target.value }))
