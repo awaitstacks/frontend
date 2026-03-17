@@ -140,8 +140,14 @@ const TourAppContextProvider = (props) => {
       return { success: false, message: "Invalid TNR format" };
     }
 
-    if (!emergencyContact || !/^[0-9]{10}$/.test(emergencyContact)) {
-      toast.error("Please enter a valid 10-digit emergency contact number");
+    // ✅ Match the same regex as backend + frontend validation
+    if (
+      !emergencyContact ||
+      !/^[\d+\-\s()]{7,25}$/.test(emergencyContact.trim())
+    ) {
+      toast.error(
+        "Invalid emergency contact format. Use digits, +, -, spaces or parentheses (7–25 characters).",
+      );
       return { success: false, message: "Invalid emergency contact" };
     }
 

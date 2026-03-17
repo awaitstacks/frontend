@@ -330,7 +330,7 @@ const TermsAgreementPage = () => {
               Emergency Contact <span className="text-red-600">*</span>
             </label>
             <input
-              type="tel"
+              type="text"
               inputMode="numeric"
               value={emergencyContact}
               onChange={(e) => setEmergencyContact(e.target.value)}
@@ -338,6 +338,8 @@ const TermsAgreementPage = () => {
               placeholder="Emergency contact (with country code if international)"
               className="w-full px-5 py-4 border border-gray-300 rounded-xl text-lg sm:text-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
               required
+              pattern={undefined} // ← force remove
+              title="" // ← remove tooltip message
             />
             <p className="mt-2 text-sm text-gray-600">
               Used only in case of emergency during the tour
