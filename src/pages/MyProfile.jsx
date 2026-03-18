@@ -3,6 +3,8 @@ import { TourAppContext } from "../context/TourAppContext";
 import { assets } from "../assets/assets";
 import axios from "axios";
 import { toast } from "react-toastify";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const MyProfile = () => {
   const { userData, setUserData, token, backendUrl, loadUserProfileData } =
@@ -29,7 +31,7 @@ const MyProfile = () => {
       const { data } = await axios.post(
         backendUrl + "/api/user/update-profile",
         formData,
-        { headers: { token } }
+        { headers: { token } },
       );
 
       if (data.success) {
@@ -58,7 +60,8 @@ const MyProfile = () => {
 
   return (
     <>
-        <div className="
+      <div
+        className="
         w-full 
         max-w-[98%] xs:max-w-[96%] sm:max-w-[98%] md:max-w-[96vw] 
         lg:max-w-[94vw] xl:max-w-[92vw] 2xl:max-w-[90vw]
@@ -67,19 +70,18 @@ const MyProfile = () => {
         shadow-2xl md:shadow-[0_30px_90px_-15px_rgba(0,0,0,0.12)]
         overflow-hidden
         p-8 xs:p-10 sm:p-12 md:p-16 lg:p-20 xl:p-24
-      ">
-        {/* Subtle floating icons */}
-
+      "
+      >
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
-         <div className="mb-10 text-center">
+          <div className="mb-10 text-center">
             <h1 className="text-3xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">
               My Profile
             </h1>
             <div className="h-1 w-20 bg-blue-600 mx-auto mt-4 rounded-full opacity-50"></div>
           </div>
+
           <div className="glass-card rounded-3xl p-6 sm:p-8 md:p-12 shadow-2xl border border-white/50">
-            {/* Header: Profile Image + Name */}
-            
+            {/* Profile Header - Image + Name */}
             <div className="text-center mb-10">
               <div className="relative inline-block group">
                 {isEdit ? (
@@ -210,7 +212,7 @@ const MyProfile = () => {
                   </div>
                 </div>
 
-                {/* Address - Full width */}
+                {/* Address */}
                 <div className="lg:col-span-2 flex flex-col items-center lg:items-start gap-5">
                   <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <svg
@@ -351,24 +353,111 @@ const MyProfile = () => {
                       />
                     </svg>
                   </div>
+
                   <div className="text-center lg:text-left w-full">
                     <p className="text-sm text-gray-600">Date of Birth</p>
+
                     {isEdit ? (
-                      <input
-                        className="w-full max-w-sm mt-3 px-5 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-                        type="date"
-                        value={userData.dob || ""}
-                        onChange={(e) =>
-                          setUserData((prev) => ({
-                            ...prev,
-                            dob: e.target.value,
-                          }))
-                        }
-                      />
+                      <div className="mt-3 w-full max-w-sm">
+                        <DatePicker
+                          selected={
+                            userData.dob &&
+                            userData.dob !== "Not Selected" &&
+                            userData.dob !== "" &&
+                            !isNaN(Date.parse(userData.dob))
+                              ? new Date(userData.dob)
+                              : null
+                          }
+                          onChange={(date) =>
+                            setUserData((prev) => ({
+                              ...prev,
+                              dob: date ? date.toISOString().split("T")[0] : "",
+                            }))
+                          }
+                          dateFormat="dd/MM/yyyy"
+                          placeholderText="DD/MM/YYYY"
+                          showMonthDropdown
+                          showYearDropdown
+                          dropdownMode="select"
+                          peekNextMonth
+                          className="w-full px-5 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                          calendarClassName="border border-gray-200 shadow-xl rounded-xl bg-white"
+                          popperClassName="z-50"
+                          onCalendarOpen={() =>
+                            console.log(
+                              "Calendar opened — current dob:",
+                              userData.dob,
+                            )
+                          }
+                          onChangeRaw={(e) => {
+                            const inputValue = e.target.value.trim();
+
+                            // Only validate when user has typed enough characters
+                            if (inputValue.length >= 8) {
+                              // Remove any non-digit or non-slash characters for validation
+                              const cleaned = inputValue.replace(
+                                /[^0-9/]/g,
+                                "",
+                              );
+
+                              // Try to parse common formats
+                              let parsedDate = null;
+
+                              // Try DD/MM/YYYY
+                              if (cleaned.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                                const [day, month, year] = cleaned.split("/");
+                                parsedDate = new Date(
+                                  `${year}-${month}-${day}`,
+                                );
+                              }
+                              // Try DDMMYYYY (no slashes)
+                              else if (cleaned.match(/^\d{8}$/)) {
+                                const day = cleaned.slice(0, 2);
+                                const month = cleaned.slice(2, 4);
+                                const year = cleaned.slice(4, 8);
+                                parsedDate = new Date(
+                                  `${year}-${month}-${day}`,
+                                );
+                              }
+
+                              if (parsedDate && !isNaN(parsedDate.getTime())) {
+                                // Valid date → update state
+                                setUserData((prev) => ({
+                                  ...prev,
+                                  dob: parsedDate.toISOString().split("T")[0],
+                                }));
+                                e.target.setCustomValidity(""); // clear error
+                              } else {
+                                // Invalid date → show error
+                                e.target.setCustomValidity(
+                                  "Please enter a valid date (DD/MM/YYYY)",
+                                );
+                                toast.error(
+                                  "Invalid date format. Please use DD/MM/YYYY or DDMMYYYY",
+                                  {
+                                    position: "top-right",
+                                    autoClose: 3000,
+                                  },
+                                );
+                              }
+                            }
+                          }}
+                        />
+                        <p className="text-xs text-gray-500 mt-1.5">
+                          Type DD/MM/YYYY or DDMMYYYY (slashes optional)
+                        </p>
+                      </div>
                     ) : (
                       <p className="font-semibold text-gray-800 mt-1">
-                        {userData.dob
-                          ? new Date(userData.dob).toLocaleDateString("en-IN")
+                        {userData.dob &&
+                        userData.dob !== "Not Selected" &&
+                        userData.dob !== "" &&
+                        !isNaN(Date.parse(userData.dob))
+                          ? new Date(userData.dob).toLocaleDateString("en-IN", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            })
                           : "Not provided"}
                       </p>
                     )}
@@ -416,7 +505,7 @@ const MyProfile = () => {
           </div>
         </div>
 
-        {/* Loading Spinner Overlay */}
+        {/* Loading Overlay */}
         {isLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
             <div className="bg-white rounded-3xl p-10 shadow-2xl flex flex-col items-center gap-6">
@@ -429,7 +518,7 @@ const MyProfile = () => {
         )}
       </div>
 
-      {/* Floating animation & glass styles */}
+      {/* Styles */}
       <style jsx>{`
         @keyframes float-slow {
           0%,
@@ -443,13 +532,6 @@ const MyProfile = () => {
         .animate-float-slow {
           animation: float-slow 25s ease-in-out infinite;
         }
-        .delay-1000 {
-          animation-delay: 1s;
-        }
-        .delay-2000 {
-          animation-delay: 2s;
-        }
-
         .glass-card {
           background: rgba(255, 255, 255, 0.85);
           backdrop-filter: blur(20px);
@@ -463,5 +545,3 @@ const MyProfile = () => {
 };
 
 export default MyProfile;
-
-
