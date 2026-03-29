@@ -75,7 +75,11 @@ const Login = () => {
         toast.error(data.message || "Google login failed");
       }
     } catch (error) {
-      toast.error("Google login failed. Please try again.");
+      console.error("Full error:", error.response?.data); // ← add this
+      toast.error(
+        error.response?.data?.message ||
+          "Google login failed. Please try again.",
+      );
     }
   };
 
