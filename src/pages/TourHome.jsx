@@ -1,11 +1,25 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Banner from "../components/Banner";
 import TourHeader from "../components/TourHeader";
 import TourSpecialityMenu from "../components/TourSpecialityMenu";
 import TopTours from "../components/TopTours";
 import CategoryWiseTours from "../components/CategoryWiseTours";
+import Enquirypage from "./Enquirypage.jsx";
+
 
 const TourHome = () => {
+  const [showEnquiry, setShowEnquiry] = useState(false);
+
+  useEffect(() => {
+    // 3 seconds-ல popup show ஆகும்
+    const timer = setTimeout(() => {
+      setShowEnquiry(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -27,6 +41,12 @@ const TourHome = () => {
 
   return (
     <div>
+      {/* Portal — body-ல direct-ஆ render ஆகும், main tag margin affect பண்ணாது */}
+      {showEnquiry && createPortal(
+        <Enquirypage onClose={() => setShowEnquiry(false)} />,
+        document.body
+      )}
+
       <main className="relative z-10 w-full">
         {/* Hero section */}
         <section className="scroll-reveal min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[85vh] pt-4 pb-8 md:pb-12">

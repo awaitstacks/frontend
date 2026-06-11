@@ -36,6 +36,8 @@ import General_physician from "./General_physician.svg";
 import Gynecologist from "./Gynecologist.svg";
 import Neurologist from "./Neurologist.svg";
 import Pediatricians from "./Pediatricians.svg";
+import mapImg from "./map.png";
+
 
 export const assets = {
   appointment_img,
@@ -43,6 +45,7 @@ export const assets = {
   group_profiles,
   logo,
   chats_icon,
+  mapImg,
   verified_icon,
   info_icon,
   profile_pic,

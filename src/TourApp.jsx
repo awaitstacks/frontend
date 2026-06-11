@@ -21,10 +21,10 @@ import ThankYouPage from "./pages/ThankYouPage.jsx";
 import Tnr from "./pages/Tnr.jsx";
 import SeatAllocation from "./pages/SeatAllocation.jsx";
 import SeatThankYouPage from "./pages/SeatThankYouPage.jsx";
-
+import Enquirypage from "./pages/Enquirypage.jsx";
 const TourApp = () => {
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-b from-white via-sky-50 to-sky-100">
+    <div className="min-h-screen flex flex-col relative bg-gradient-to-b from-white via-sky-50 to-sky-100">
       {/* Toast Notifications */}
       <ToastContainer />
 
@@ -78,6 +78,7 @@ const TourApp = () => {
           <Route path="/seat-thank-you" element={<SeatThankYouPage />} />
           <Route path="/tnr" element={<Tnr />} />
           <Route path="/seat-allocation/:tnr" element={<SeatAllocation />} />
+          <Route path="/create-enquiry" element={<Enquirypage />} />
         </Routes>
       </main>
 

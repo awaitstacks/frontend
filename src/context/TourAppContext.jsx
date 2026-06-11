@@ -21,6 +21,8 @@ const TourAppContextProvider = (props) => {
   );
 
   const [userData, setUserData] = useState(false);
+  const [enquiries, setEnquiries] = useState([]);
+  const [enquiryLoading, setEnquiryLoading] = useState(false);
 
   // ────────────────────────────────────────────────
   //               Tours & Years
@@ -320,6 +322,31 @@ const TourAppContextProvider = (props) => {
       return { success: false, message: msg };
     }
   }, [backendUrl, token]);
+
+  // POST /api/user/create-enquiry
+  const createEnquiry = async (formData) => {
+    try {
+      setEnquiryLoading(true);
+      const { data } = await axios.post(
+        `${backendUrl}/api/user/create-enquiry`,
+        formData
+      );
+      if (data.success) {
+        toast.success(`Enquiry submitted! FIT Code: ${data.fitCode}`);
+        return { success: true, fitCode: data.fitCode };
+      } else {
+        toast.error(data.message);
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      const msg = error.response?.data?.message || error.message || "Network error";
+      toast.error(msg);
+      return { success: false, message: msg };
+    } finally {
+      setEnquiryLoading(false);
+    }
+  };
+
   // ────────────────────────────────────────────────
   //                   Context Value
   // ────────────────────────────────────────────────
@@ -351,6 +378,9 @@ const TourAppContextProvider = (props) => {
     backendUrl,
     confirmSeatSelection,
     getPaymentMethods,
+    enquiries,
+    enquiryLoading,
+    createEnquiry
   };
 
   // ────────────────────────────────────────────────
