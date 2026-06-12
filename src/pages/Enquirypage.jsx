@@ -211,7 +211,7 @@ const Enquirypage = ({ onClose }) => {
                                             {[
                                                 { label: "Full Name", name: "fullName", icon: "👤", placeholder: "Enter your full name", required: true },
                                                 { label: "Mobile Number", name: "mobileNumber", icon: "📞", placeholder: "+91 XXXXX XXXXX", required: true },
-                                                { label: "Email Address", name: "email", icon: "✉️", placeholder: "you@example.com", type: "email", required: true },
+                                                { label: "Email Address", name: "email", icon: "✉️", placeholder: "you@example.com", type: "email", },
                                                 { label: "City / Location", name: "city", icon: "📍", placeholder: "e.g. Chennai" },
                                             ].map((f) => (
                                                 <div key={f.name}>
@@ -265,7 +265,7 @@ const Enquirypage = ({ onClose }) => {
                                         {/* Row 2: Travel Date + Days + Nights */}
                                         <div className="enq-tour-row2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px" }}>
                                             <div>
-                                                <label className="enq-field-label" style={labelStyle}>Preferred Travel Date <span style={{ color: "#ef4444" }}>*</span></label>
+                                                <label className="enq-field-label" style={labelStyle}>Preferred Travel Date </label>
                                                 <div style={{ position: "relative" }}>
                                                     <span className="enq-icon" style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "14px" }}>📅</span>
                                                     <input
@@ -273,7 +273,6 @@ const Enquirypage = ({ onClose }) => {
                                                         name="preferredTravelDate"
                                                         value={formData.preferredTravelDate}
                                                         onChange={handleChange}
-                                                        required
                                                         type="date"
                                                         min={new Date().toISOString().split("T")[0]}
                                                         style={fieldStyle}
@@ -281,17 +280,17 @@ const Enquirypage = ({ onClose }) => {
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="enq-field-label" style={labelStyle}>No. of Days <span style={{ color: "#ef4444" }}>*</span></label>
+                                                <label className="enq-field-label" style={labelStyle}>No. of Days </label>
                                                 <div style={{ position: "relative" }}>
                                                     <span className="enq-icon" style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "14px" }}>🌤️</span>
-                                                    <input className="enq-input" name="numberOfDays" value={formData.numberOfDays} onChange={handleChange} required type="number" min="1" placeholder="5" style={fieldStyle} />
+                                                    <input className="enq-input" name="numberOfDays" value={formData.numberOfDays} onChange={handleChange} min="1" placeholder="5" style={fieldStyle} />
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="enq-field-label" style={labelStyle}>No. of Nights <span style={{ color: "#ef4444" }}>*</span></label>
+                                                <label className="enq-field-label" style={labelStyle}>No. of Nights</label>
                                                 <div style={{ position: "relative" }}>
                                                     <span className="enq-icon" style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "14px" }}>🌙</span>
-                                                    <input className="enq-input" name="numberOfNights" value={formData.numberOfNights} onChange={handleChange} required type="number" min="0" placeholder="4" style={fieldStyle} />
+                                                    <input className="enq-input" name="numberOfNights" value={formData.numberOfNights} onChange={handleChange} min="0" placeholder="4" style={fieldStyle} />
                                                 </div>
                                             </div>
                                         </div>
@@ -345,6 +344,7 @@ const Enquirypage = ({ onClose }) => {
                                                     <span className="enq-icon" style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", zIndex: 1 }}>📣</span>
                                                     <select className="enq-select enq-input" name="source" value={formData.source} onChange={handleChange} style={{ ...fieldStyle, appearance: "none" }}>
                                                         <option value="">Select Source</option>
+                                                        <option>Regular</option>
                                                         <option>Google</option><option>Facebook</option><option>Instagram</option>
                                                         <option>YouTube</option><option>Friends & Family</option>
                                                         <option>Whatsapp/Referral</option><option>Others</option>
