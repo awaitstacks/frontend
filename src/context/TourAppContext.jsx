@@ -78,19 +78,37 @@ const TourAppContextProvider = (props) => {
   //               User Profile & Auth
   // ────────────────────────────────────────────────
 
-  const loadUserProfileData = async () => {
+    const loadUserProfileData = async () => {
     if (!token) return;
+
+    // Old / expired login on this browser → clear it quietly and show the
+    // site as logged out, instead of a "jwt expired" error toast.
+    const clearExpiredLogin = () => {
+      localStorage.removeItem("token");
+      setToken(false);
+      setUserData(false);
+    };
+    const isAuthError = (msg = "") =>
+      /jwt|token|not authori[sz]ed|login again/i.test(String(msg));
+
     try {
       const { data } = await axios.get(`${backendUrl}/api/user/get-profile`, {
         headers: { token },
       });
       if (data.success) {
         setUserData(data.user);
+      } else if (isAuthError(data.message)) {
+        clearExpiredLogin();
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      const msg = error.response?.data?.message || error.message;
+      if (error.response?.status === 401 || isAuthError(msg)) {
+        clearExpiredLogin();
+      } else {
+        toast.error(msg);
+      }
     }
   };
 

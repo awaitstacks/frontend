@@ -3,7 +3,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
-
+import logoTransparent from "../assets/gv_logo_transparent_1200.png";
 const Footer = () => {
   const navigate = useNavigate();
 
@@ -38,7 +38,7 @@ const Footer = () => {
             <img
               onClick={() => handleNavClick("/")}
               className="w-40 xs:w-44 md:w-52 cursor-pointer transition-all duration-300 hover:opacity-75"
-              src={assets.logo}
+              src={logoTransparent}
               alt="Tour Planners Logo"
             />
             <p className="text-gray-500 leading-relaxed text-sm md:text-base max-w-sm">
