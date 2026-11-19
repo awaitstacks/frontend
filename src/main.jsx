@@ -8,6 +8,8 @@ import { BrowserRouter } from "react-router-dom";
 import TourAppContextProvider from "./context/TourAppContext.jsx";
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { startTrafficTracker } from "./utils/trafficTracker";
+startTrafficTracker();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
