@@ -1,8 +1,11 @@
+
+
 // import React, { useContext, useEffect, useState } from "react";
 // import { useNavigate, useParams, useLocation } from "react-router-dom";
 // import { TourAppContext } from "../context/TourAppContext.jsx";
 // import axios from "axios";
 // import { toast } from "react-toastify";
+// import { trackEvent } from "../utils/trafficTracker"; // Website Traffic — stage events
 
 // // stationCode is NOT guaranteed unique within a tour's boardingPoints /
 // // deboardingPoints array — the same code (e.g. "MAS") can legitimately
@@ -127,6 +130,7 @@
 //       }
 
 //       setTourInfo(t);
+//       trackEvent("Booking page opened", { tour: t.title || "" });
 
 //       setTransportPoints({
 //         boarding: t.boardingPoints || [],
@@ -458,6 +462,7 @@
 
 //     if (!token) {
 //       toast.warning("Please login to continue booking");
+//       trackEvent("Booking: login required", { tour: tourInfo?.title || "" });
 
 //       const draft = { travellers, contact, billingAddress, bookingType };
 //       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
@@ -635,6 +640,11 @@
 //       );
 
 //       if (data.success) {
+//         trackEvent("Booking added to trolly", {
+//           tour: tourInfo?.title || "",
+//           travellers: travellers.length,
+//           type: bookingType,
+//         });
 //         toast.success(
 //           bookingType === "offline"
 //             ? "Offline booking added to My Trolly! Awaiting confirmation."
@@ -648,10 +658,15 @@
 //           window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 //         }, 100);
 //       } else {
+//         trackEvent("Booking failed", { tour: tourInfo?.title || "", reason: String(data.message || "").slice(0, 80) });
 //         toast.error(data.message);
 //       }
 //     } catch (error) {
 //       console.error(error);
+//       trackEvent("Booking failed", {
+//         tour: tourInfo?.title || "",
+//         reason: String(error.response?.data?.message || error.message || "").slice(0, 80),
+//       });
 //       toast.error(
 //         error.response?.data?.message ||
 //           "Booking failed. Please check traveller details.",
@@ -1492,6 +1507,8 @@
 // export default TourBooking;
 
 
+
+
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { TourAppContext } from "../context/TourAppContext.jsx";
@@ -1515,6 +1532,39 @@ const getPointId = (point) => {
   if (raw && typeof raw === "object" && raw.$oid) return String(raw.$oid);
   return raw !== undefined && raw !== null ? String(raw) : "";
 };
+
+// ── Trip display order: Boarding → Middle → Deboarding (by tripType) ──
+// Only changes the ORDER on screen. Each trip keeps its ORIGINAL index
+// (idx), so add-on save / match logic stays exactly the same.
+const legRank = (tt) => {
+  const s = String(tt || "").trim().toLowerCase();
+  if (s.includes("deboard")) return 3;
+  if (s.includes("board")) return 1;
+  return 2; // Middle, or no trip type → keeps its original place
+};
+const sortTripsForView = (list = []) =>
+  list
+    .map((trip, idx) => ({ trip, idx }))
+    .sort((a, b) => legRank(a.trip.tripType) - legRank(b.trip.tripType) || a.idx - b.idx);
+
+// ── Save add-ons in trip order: Boarding → Middle → Deboarding ──
+// Click order (e.g. Deboarding first) no longer matters — every page
+// that shows selectedAddons gets them already in the right order.
+const addonTripRank = (tt) => {
+  const s = String(tt || "").trim().toUpperCase();
+  if (s.startsWith("BOARD")) return 0;
+  if (s.startsWith("MIDDLE")) return 1;
+  if (s.startsWith("DEBOARD") || s.startsWith("DEBOARF")) return 2;
+  return 3;
+};
+const isFlightEntry = (a) => a.flightIndex !== undefined && a.flightIndex !== null;
+const sortAddonsByTrip = (list = []) =>
+  [...list].sort(
+    (a, b) =>
+      addonTripRank(a.tripType) - addonTripRank(b.tripType) ||
+      Number(isFlightEntry(a)) - Number(isFlightEntry(b)) ||
+      (a.trainIndex ?? a.flightIndex ?? 0) - (b.trainIndex ?? b.flightIndex ?? 0),
+  );
 
 const TourBooking = () => {
   const { tourId } = useParams();
@@ -1827,7 +1877,7 @@ const TourBooking = () => {
       addedAt: new Date(),
     });
 
-    updated[travellerIndex].selectedAddons = selectedAddons;
+    updated[travellerIndex].selectedAddons = sortAddonsByTrip(selectedAddons);
     setTravellers(updated);
   };
 
@@ -1878,7 +1928,7 @@ const TourBooking = () => {
       addedAt: new Date(),
     });
 
-    updated[travellerIndex].selectedAddons = selectedAddons;
+    updated[travellerIndex].selectedAddons = sortAddonsByTrip(selectedAddons);
     setTravellers(updated);
   };
 
@@ -2379,6 +2429,11 @@ const TourBooking = () => {
                 .filter(
                   ({ flight }) =>
                     Array.isArray(flight.addons) && flight.addons.length > 0,
+                )
+                .sort(
+                  (a, b) =>
+                    legRank(a.flight.tripType) - legRank(b.flight.tripType) ||
+                    a.flightIndexInPackage - b.flightIndexInPackage,
                 );
 
               // ── Decide: leg-based addon UI, or flat fallback? ────────
@@ -2711,7 +2766,7 @@ const TourBooking = () => {
 
                         {trainDetails.length > 0 ? (
                           <div className="space-y-3">
-                            {trainDetails.map((train, trainIndex) => {
+                            {sortTripsForView(trainDetails).map(({ trip: train, idx: trainIndex }, pos) => {
                               const trainAddons = train.addons || [];
 
                               return (
@@ -2722,7 +2777,7 @@ const TourBooking = () => {
                                   <div className="grid grid-cols-1 md:grid-cols-[60px_1fr_300px] gap-4 items-center">
                                     <div className="flex md:justify-center">
                                       <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
-                                        {String(trainIndex + 1).padStart(2, "0")}
+                                        {String(pos + 1).padStart(2, "0")}
                                       </div>
                                     </div>
 
@@ -2810,7 +2865,7 @@ const TourBooking = () => {
 
                           <div className="space-y-3">
                             {flightsWithAddons.map(
-                              ({ flight, flightIndexInPackage }) => (
+                              ({ flight, flightIndexInPackage }, pos) => (
                                 <div
                                   key={flight._id || flightIndexInPackage}
                                   className="border border-gray-200 rounded-xl p-4 sm:p-5 bg-white hover:border-purple-200 transition-all"
@@ -2818,9 +2873,7 @@ const TourBooking = () => {
                                   <div className="grid grid-cols-1 md:grid-cols-[60px_1fr_300px] gap-4 items-center">
                                     <div className="flex md:justify-center">
                                       <div className="w-10 h-10 rounded-lg bg-purple-600 text-white flex items-center justify-center font-bold text-sm">
-                                        {String(
-                                          flightIndexInPackage + 1,
-                                        ).padStart(2, "0")}
+                                        {String(pos + 1).padStart(2, "0")}
                                       </div>
                                     </div>
 
